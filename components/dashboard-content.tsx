@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Copy, Eye, Edit, Trash2, Loader } from 'lucide-react'
 import Page from '@/components/page'
 import Section from '@/components/section'
@@ -321,17 +322,16 @@ export const DashboardContent = () => {
 												className='border-b border-zinc-200 dark:border-zinc-700 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 transition-all'
 											>
 												{/* Image */}
-												<td className='px-6 py-4'>
-													<div className='h-16 w-16 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-700 flex-shrink-0'>
-														<img
-															src={recipe.image}
-															alt={recipe.name}
-															className='h-full w-full object-cover'
-														/>
-													</div>
-												</td>
-
-												{/* Title */}
+							<td className='px-6 py-4'>
+								<div className='h-16 w-16 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-700 flex-shrink-0 relative'>
+									<Image
+										src={recipe.image}
+										alt={recipe.name}
+										fill
+										className='object-cover'
+									/>
+								</div>
+							</td>												{/* Title */}
 												<td className='px-6 py-4'>
 													<div className='font-semibold text-zinc-900 dark:text-white'>{recipe.name}</div>
 													<div className='text-sm text-zinc-600 dark:text-zinc-400'>{recipe.description}</div>
