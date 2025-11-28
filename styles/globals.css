@@ -42,3 +42,53 @@ body {
 .animate-fadeIn {
 	animation: fadeIn 0.3s ease-in;
 }
+
+/* Print Styles */
+@media print {
+	body {
+		background-color: white;
+		color: black;
+	}
+
+	/* Hide elements from printing */
+	.no-print,
+	header,
+	nav,
+	.bottom-nav,
+	.social-share,
+	.back-button,
+	.print-buttons {
+		display: none !important;
+	}
+
+	/* Ensure main content is visible */
+	.print-content {
+		display: block !important;
+	}
+
+	/* Page breaks and margins */
+	@page {
+		margin: 1cm;
+	}
+
+	/* Recipe content styling for print */
+	h1 {
+		color: black;
+		page-break-after: avoid;
+	}
+
+	h2 {
+		color: black;
+		page-break-after: avoid;
+	}
+
+	img {
+		max-width: 100%;
+		page-break-inside: avoid;
+	}
+
+	.ingredients-list,
+	.instructions-list {
+		page-break-inside: avoid;
+	}
+}

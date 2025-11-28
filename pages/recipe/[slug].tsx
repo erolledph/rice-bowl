@@ -124,8 +124,33 @@ const RecipeDetail = () => {
 
 			<Page>
 				<Section>
-					{/* Hero Image with Top Action Bar */}
-					<div className='relative h-96 w-full mb-8 rounded-2xl overflow-hidden shadow-2xl group'>
+					{/* Action Buttons - Above Image */}
+					<div className='print-buttons flex gap-2 justify-end mb-4'>
+						{/* Print Button */}
+						<button
+							onClick={() => window.print()}
+							className='p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-all hover:scale-110'
+							title='Print this recipe'
+						>
+							<span className='text-xl'>🖨️</span>
+						</button>
+
+						{/* Favorite Button */}
+						<button
+							onClick={() => toggleFavorite(recipe.slug)}
+							className={`p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
+								isFav
+									? 'bg-red-500 hover:bg-red-600 text-white'
+									: 'bg-zinc-300 hover:bg-zinc-400 text-zinc-900'
+							}`}
+							title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+						>
+							<span className='text-xl'>{isFav ? '❤️' : '♡'}</span>
+						</button>
+					</div>
+
+					{/* Hero Image */}
+					<div className='print-content relative h-96 w-full mb-8 rounded-2xl overflow-hidden shadow-2xl'>
 						<Image
 							src={recipe.image}
 							alt={recipe.name}
@@ -133,35 +158,10 @@ const RecipeDetail = () => {
 							className='object-cover'
 						/>
 						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'></div>
-
-						{/* Top Action Buttons - Print and Favorite */}
-						<div className='absolute top-4 right-4 flex gap-2'>
-							{/* Print Button */}
-							<button
-								onClick={() => window.print()}
-								className='p-3 bg-white/90 hover:bg-white text-zinc-900 rounded-full shadow-lg transition-all hover:scale-110'
-								title='Print this recipe'
-							>
-								<span className='text-xl'>🖨️</span>
-							</button>
-
-							{/* Favorite Button */}
-							<button
-								onClick={() => toggleFavorite(recipe.slug)}
-								className={`p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
-									isFav
-										? 'bg-red-500 hover:bg-red-600 text-white'
-										: 'bg-white/90 hover:bg-white text-zinc-900'
-								}`}
-								title={isFav ? 'Remove from favorites' : 'Add to favorites'}
-							>
-								<span className='text-xl'>{isFav ? '❤️' : '♡'}</span>
-							</button>
-						</div>
 					</div>
 
 					{/* Header */}
-					<div className='mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
+					<div className='print-content mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
 						<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
 							{recipe.name}
 						</h1>
@@ -180,11 +180,11 @@ const RecipeDetail = () => {
 					/>
 
 					{/* Ingredients Section */}
-					<div className='mb-8'>
+					<div className='print-content mb-8'>
 						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-4'>
 							🛒 Ingredients
 						</h2>
-						<div className='bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg'>
+						<div className='ingredients-list bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg'>
 							<ul className='space-y-2'>
 								{recipe.ingredients.map((ingredient, index) => (
 									<li
@@ -200,11 +200,11 @@ const RecipeDetail = () => {
 					</div>
 
 					{/* Instructions Section */}
-					<div className='mb-12'>
+					<div className='print-content mb-12'>
 						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-4'>
 							👨‍🍳 Instructions
 						</h2>
-						<div className='bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg'>
+						<div className='instructions-list bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg'>
 							<ol className='space-y-3'>
 								{recipe.instructions.map((instruction, index) => (
 									<li
@@ -222,14 +222,16 @@ const RecipeDetail = () => {
 					</div>
 
 					{/* Social Share Section */}
-					<SocialShare
-						title={recipe.name}
-						description={recipe.description}
-						url={recipeUrl}
-					/>
+					<div className='social-share'>
+						<SocialShare
+							title={recipe.name}
+							description={recipe.description}
+							url={recipeUrl}
+						/>
+					</div>
 
 					{/* Back Button - Only at bottom */}
-					<div className='mt-12 flex justify-center'>
+					<div className='back-button mt-12 flex justify-center'>
 						<button
 							onClick={() => window.history.back()}
 							className='px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg'
