@@ -53,7 +53,7 @@ const links = [
 	},
 	{
 		label: 'Favorites',
-		href: '/recipes',
+		href: '/favorites',
 		icon: (
 			<svg
 				viewBox='0 0 15 15'

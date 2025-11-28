@@ -1,26 +1,28 @@
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
 import SearchFilterBar from '@/components/search-filter-bar'
 import { useRecipes } from '@/hooks/useRecipes'
 
-const Recipes = () => {
+const FavoritesPage = () => {
 	const [searchQuery, setSearchQuery] = useState('')
-	const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
 	const [mealFilters, setMealFilters] = useState<string[]>([])
 	const [ingredientFilters, setIngredientFilters] = useState<string[]>([])
 	const [countryFilters, setCountryFilters] = useState<string[]>([])
 	const [meatFilters, setMeatFilters] = useState<string[]>([])
 	const [tasteFilters, setTasteFilters] = useState<string[]>([])
-	const { recipes, toggleFavorite, isFavorite, getFavoriteRecipes, getAllTags } = useRecipes()
+
+	const { getFavoriteRecipes, toggleFavorite, isFavorite, getAllTags } = useRecipes()
 
 	const tags = getAllTags()
 	const favoriteRecipes = getFavoriteRecipes()
 
 	const filteredRecipes = useMemo(() => {
-		let results = showFavoritesOnly ? favoriteRecipes : recipes
+		let results = favoriteRecipes
 
+		// Apply search query
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase()
 			results = results.filter(
@@ -65,27 +67,29 @@ const Recipes = () => {
 		}
 
 		return results
-	}, [searchQuery, showFavoritesOnly, mealFilters, ingredientFilters, countryFilters, meatFilters, tasteFilters, recipes, favoriteRecipes])
+	}, [searchQuery, mealFilters, ingredientFilters, countryFilters, meatFilters, tasteFilters, favoriteRecipes])
 
 	return (
 		<Page>
 			<Section>
 				<div className='mb-8'>
+					{/* Header */}
+					<Link href='/' className='inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-bold mb-4 group'>
+						<span className='transform group-hover:-translate-x-1 transition-transform'>←</span>
+						Back Home
+					</Link>
 					<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
-						🍳 All Recipes
+						♥ My Favorite Recipes
 					</h1>
-					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-8'>
-						Discover and explore our collection of delicious recipes
+					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-6'>
+						Your personal collection of recipes you love
 					</p>
 
 					{/* Search and Filter Bar */}
 					<SearchFilterBar
 						searchQuery={searchQuery}
 						onSearchChange={setSearchQuery}
-						showFavoritesButton={true}
-						showFavoritesOnly={showFavoritesOnly}
-						onFavoritesToggle={setShowFavoritesOnly}
-						favoriteCount={favoriteRecipes.length > 0 ? favoriteRecipes.length : 0}
+						favoriteCount={favoriteRecipes.length}
 						mealFilters={mealFilters}
 						onMealFiltersChange={setMealFilters}
 						ingredientFilters={ingredientFilters}
@@ -104,7 +108,7 @@ const Recipes = () => {
 						resultCount={filteredRecipes.length}
 					/>
 
-					{/* Recipe Cards Grid */}
+					{/* Recipes Grid */}
 					{filteredRecipes.length > 0 ? (
 						<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
 							{filteredRecipes.map((recipe) => (
@@ -116,15 +120,44 @@ const Recipes = () => {
 								/>
 							))}
 						</div>
+					) : favoriteRecipes.length === 0 ? (
+						<div className='text-center py-20'>
+							<div className='text-6xl mb-4'>🍽️</div>
+							<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>
+								You {`haven't`} marked any recipes as favorites yet
+							</p>
+							<p className='text-zinc-500 dark:text-zinc-500 mb-8'>
+								Explore recipes and mark them with ♥ to add them to your favorites
+							</p>
+							<Link
+								href='/recipes'
+								className='inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl'
+							>
+								Browse Recipes
+							</Link>
+						</div>
 					) : (
 						<div className='text-center py-20'>
 							<div className='text-6xl mb-4'>🔍</div>
 							<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>
-								No recipes found matching your criteria
+								No recipes found matching your filters
 							</p>
 							<p className='text-zinc-500 dark:text-zinc-500 mb-8'>
 								Try adjusting your search or filters
 							</p>
+							<button
+								onClick={() => {
+									setSearchQuery('')
+									setMealFilters([])
+									setIngredientFilters([])
+									setCountryFilters([])
+									setMeatFilters([])
+									setTasteFilters([])
+								}}
+								className='inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl'
+							>
+								Clear All Filters
+							</button>
 						</div>
 					)}
 				</div>
@@ -133,4 +166,4 @@ const Recipes = () => {
 	)
 }
 
-export default Recipes
+export default FavoritesPage

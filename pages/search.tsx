@@ -1,88 +1,106 @@
 import { useRouter } from 'next/router'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
+import SearchFilterBar from '@/components/search-filter-bar'
 import { useRecipes } from '@/hooks/useRecipes'
 
 const SearchPage = () => {
 	const router = useRouter()
-	const { q, tags } = router.query
-	const { getFilteredRecipes, toggleFavorite, isFavorite } = useRecipes()
+	const { q } = router.query
+	const [searchQuery, setSearchQuery] = useState(typeof q === 'string' ? q : '')
+	const [mealFilters, setMealFilters] = useState<string[]>([])
+	const [ingredientFilters, setIngredientFilters] = useState<string[]>([])
+	const [countryFilters, setCountryFilters] = useState<string[]>([])
+	const [meatFilters, setMeatFilters] = useState<string[]>([])
+	const [tasteFilters, setTasteFilters] = useState<string[]>([])
 
-	const searchQuery = typeof q === 'string' ? q : ''
-	const selectedTags = typeof tags === 'string' ? tags.split(',').filter((t) => t) : []
+	const { getFilteredRecipes, toggleFavorite, isFavorite, getAllTags } = useRecipes()
 
-	// Get results based on search query and tags
+	const tags = getAllTags()
 	const allResults = getFilteredRecipes(searchQuery)
-	const results = selectedTags.length > 0
-		? allResults.filter((recipe) => {
-				const recipeTags = [
-					recipe.name,
-					recipe.description,
-					recipe.tags.meal,
-					recipe.tags.meat,
-					recipe.tags.country,
-					...recipe.tags.ingredient,
-					...recipe.tags.taste,
-				].map((t) => t.toLowerCase())
-				return selectedTags.some((tag) =>
-					recipeTags.some((recipeTag) =>
-						recipeTag.includes(tag.toLowerCase())
-					)
-				)
-			})
-		: allResults
+
+	const results = useMemo(() => {
+		let filtered = allResults
+
+		// Apply meal filters
+		if (mealFilters.length > 0) {
+			filtered = filtered.filter((recipe) => mealFilters.includes(recipe.tags.meal))
+		}
+
+		// Apply ingredient filters
+		if (ingredientFilters.length > 0) {
+			filtered = filtered.filter((recipe) =>
+				ingredientFilters.some((ing) => recipe.tags.ingredient.includes(ing))
+			)
+		}
+
+		// Apply country filters
+		if (countryFilters.length > 0) {
+			filtered = filtered.filter((recipe) => countryFilters.includes(recipe.tags.country))
+		}
+
+		// Apply meat filters
+		if (meatFilters.length > 0) {
+			filtered = filtered.filter((recipe) => meatFilters.includes(recipe.tags.meat))
+		}
+
+		// Apply taste filters
+		if (tasteFilters.length > 0) {
+			filtered = filtered.filter((recipe) =>
+				tasteFilters.some((taste) => recipe.tags.taste.includes(taste))
+			)
+		}
+
+		return filtered
+	}, [allResults, mealFilters, ingredientFilters, countryFilters, meatFilters, tasteFilters])
 
 	return (
 		<Page>
 			<Section>
 				{/* Header */}
-				<div className='mb-12'>
+				<div className='mb-8'>
 					<Link href='/' className='inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-bold mb-4 group'>
 						<span className='transform group-hover:-translate-x-1 transition-transform'>←</span>
 						Back Home
 					</Link>
 					<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
-						Search Results
+						🔍 Search Results
 					</h1>
-					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium'>
-						{searchQuery || selectedTags.length > 0
-							? `Found ${results.length} recipe${results.length !== 1 ? 's' : ''}`
-							: 'Enter a search query'}
+					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-8'>
+						{searchQuery ? `Results for "${searchQuery}"` : 'Search recipes from our collection'}
 					</p>
 
-					{/* Active Tags Display */}
-					{selectedTags.length > 0 && (
-						<div className='mt-6 flex flex-wrap gap-2 pb-4 border-b border-orange-200 dark:border-orange-900'>
-							{selectedTags.map((tag) => (
-								<div
-									key={tag}
-									className='inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 text-orange-900 dark:text-orange-100 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm'
-								>
-									<span>🏷️ {tag}</span>
-									<button
-										onClick={() => {
-											const newTags = selectedTags.filter((t) => t !== tag)
-											if (newTags.length > 0) {
-												router.push(`/search?q=${encodeURIComponent(searchQuery)}&tags=${encodeURIComponent(newTags.join(','))}`)
-											} else {
-												router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-											}
-										}}
-										className='ml-1 text-orange-600 dark:text-orange-300 hover:text-orange-800 dark:hover:text-orange-200 font-bold hover:scale-125 transition-transform'
-									>
-										×
-									</button>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
-
-				{/* Results Count */}
-				<div className='mb-6 text-sm text-zinc-600 dark:text-zinc-400'>
-					Found {results.length} recipe{results.length !== 1 ? 's' : ''}
+					{/* Search and Filter Bar */}
+					<SearchFilterBar
+						searchQuery={searchQuery}
+						onSearchChange={(query) => {
+							setSearchQuery(query)
+							if (query.trim()) {
+								router.push(`/search?q=${encodeURIComponent(query)}`, undefined, { shallow: true })
+							} else {
+								router.push('/search', undefined, { shallow: true })
+							}
+						}}
+						mealFilters={mealFilters}
+						onMealFiltersChange={setMealFilters}
+						ingredientFilters={ingredientFilters}
+						onIngredientFiltersChange={setIngredientFilters}
+						countryFilters={countryFilters}
+						onCountryFiltersChange={setCountryFilters}
+						meatFilters={meatFilters}
+						onMeatFiltersChange={setMeatFilters}
+						tasteFilters={tasteFilters}
+						onTasteFiltersChange={setTasteFilters}
+						allMeals={tags.meals}
+						allIngredients={tags.ingredients}
+						allCountries={tags.countries}
+						allMeats={tags.meats}
+						allTastes={tags.tastes}
+						resultCount={results.length}
+					/>
 				</div>
 
 				{/* Results Grid */}
@@ -101,7 +119,7 @@ const SearchPage = () => {
 					<div className='text-center py-20'>
 						<div className='text-6xl mb-4'>🍳</div>
 						<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>
-							{searchQuery || selectedTags.length > 0
+							{searchQuery
 								? 'No recipes found matching your search'
 								: 'Try searching for recipes by name, ingredients, or cuisine'}
 						</p>
@@ -109,10 +127,10 @@ const SearchPage = () => {
 							Browse all recipes or adjust your filters
 						</p>
 						<Link
-							href='/'
+							href='/recipes'
 							className='inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl'
 						>
-							← Back to Recipes
+							← Browse All Recipes
 						</Link>
 					</div>
 				)}

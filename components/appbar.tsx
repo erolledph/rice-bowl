@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 
 const links = [
 	{ label: 'Recipes', href: '/recipes' },
+	{ label: '♥ Favorites', href: '/favorites' },
 ]
 
 const Appbar = () => {
