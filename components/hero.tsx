@@ -42,31 +42,36 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 	const isTagSelected = (tag: string) => selectedTags.includes(tag)
 
 	return (
-		<div className='relative bg-gradient-to-b from-orange-50 to-transparent dark:from-zinc-800 dark:to-transparent py-12 px-6'>
-			<div className='mx-auto max-w-screen-md'>
-				<div className='text-center mb-8'>
-					<h1 className='text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-3'>
-						Welcome to The Cook Book
+		<div className='relative bg-gradient-to-br from-orange-400 via-red-300 to-pink-300 dark:from-orange-900 dark:via-red-900 dark:to-pink-900 py-20 px-6 overflow-hidden'>
+			{/* Decorative background elements */}
+			<div className='absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-48 -mt-48'></div>
+			<div className='absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -ml-48 -mb-48'></div>
+			
+			<div className='mx-auto max-w-4xl relative z-10'>
+				<div className='text-center mb-12'>
+					<h1 className='text-5xl md:text-6xl font-black text-white mb-4 leading-tight'>
+						Delicious Recipes<br />at Your Fingertips
 					</h1>
-					<p className='text-lg text-zinc-600 dark:text-zinc-300 mb-8'>
-						Discover delicious recipes for every occasion
+					<p className='text-xl text-white/90 mb-2 font-light'>
+						Discover thousands of recipes from cuisines around the world
 					</p>
+					<p className='text-sm text-white/70'>Easy • Fresh • Inspiring</p>
 				</div>
 
-				<form onSubmit={handleSearch} className='mb-10'>
+				<form onSubmit={handleSearch} className='mb-12'>
 					<div className='relative'>
-						<div className='w-full px-6 py-3 rounded-full bg-white dark:bg-zinc-700 border-2 border-transparent hover:border-orange-300 focus-within:border-orange-500 transition-colors shadow-lg flex flex-wrap items-center gap-2'>
+						<div className='w-full px-6 py-4 rounded-full bg-white dark:bg-zinc-800 shadow-2xl border-2 border-transparent hover:border-orange-200 focus-within:border-orange-400 transition-all flex flex-wrap items-center gap-2 backdrop-blur-sm'>
 							{/* Selected Tags as Chips */}
 							{selectedTags.map((tag) => (
 								<div
 									key={tag}
-									className='flex items-center gap-1 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 px-3 py-1 rounded-full text-sm font-medium'
+									className='flex items-center gap-2 bg-gradient-to-r from-orange-100 to-orange-50 dark:from-orange-900 dark:to-orange-800 text-orange-900 dark:text-orange-100 px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm'
 								>
 									<span>{tag}</span>
 									<button
 										type='button'
 										onClick={() => removeTag(tag)}
-										className='ml-1 text-orange-600 dark:text-orange-300 hover:text-orange-800 dark:hover:text-orange-200 font-bold'
+										className='ml-1 text-orange-600 dark:text-orange-300 hover:text-orange-800 dark:hover:text-orange-200 font-bold hover:scale-110 transition-transform'
 									>
 										×
 									</button>
@@ -76,16 +81,16 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 							{/* Search Input */}
 							<input
 								type='text'
-								placeholder={selectedTags.length > 0 ? 'Add more...' : 'Search for recipes (e.g., pasta, chicken, desserts)...'}
+								placeholder={selectedTags.length > 0 ? 'Add more keywords...' : 'Search recipes (pasta, chicken, dessert...)'}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								className='flex-1 min-w-0 bg-transparent text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none'
+								className='flex-1 min-w-0 bg-transparent text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none text-base'
 							/>
 
 							{/* Search Button */}
 							<button
 								type='submit'
-								className='px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-colors whitespace-nowrap'
+								className='px-8 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-full transition-all transform hover:scale-105 shadow-lg whitespace-nowrap active:scale-95'
 							>
 								Search
 							</button>
@@ -94,10 +99,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 				</form>
 
 				{/* Category Tags */}
-				<div className='space-y-4'>
+				<div className='space-y-6 mt-12'>
 					{/* Meals */}
 					<div>
-						<h3 className='text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-400 mb-2'>
+						<h3 className='text-xs font-bold uppercase tracking-widest text-white/80 mb-3'>
 							Meal Type
 						</h3>
 						<div className='flex flex-wrap gap-2'>
@@ -106,10 +111,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 									key={meal}
 									type='button'
 									onClick={() => handleTagClick(meal)}
-									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+									className={`px-4 py-2 rounded-full text-sm font-semibold transition-all transform ${
 										isTagSelected(meal)
-											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
-											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+											? 'bg-white text-orange-600 shadow-lg scale-105'
+											: 'bg-white/20 text-white backdrop-blur hover:bg-white/30'
 									}`}
 								>
 									{meal}
@@ -120,7 +125,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
 					{/* Popular Ingredients */}
 					<div>
-						<h3 className='text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-400 mb-2'>
+						<h3 className='text-xs font-bold uppercase tracking-widest text-white/80 mb-3'>
 							Popular Ingredients
 						</h3>
 						<div className='flex flex-wrap gap-2'>
@@ -129,10 +134,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 									key={ingredient}
 									type='button'
 									onClick={() => handleTagClick(ingredient)}
-									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+									className={`px-4 py-2 rounded-full text-sm font-semibold transition-all transform ${
 										isTagSelected(ingredient)
-											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
-											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+											? 'bg-white text-orange-600 shadow-lg scale-105'
+											: 'bg-white/20 text-white backdrop-blur hover:bg-white/30'
 									}`}
 								>
 									{ingredient}
@@ -143,7 +148,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
 					{/* Protein */}
 					<div>
-						<h3 className='text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-400 mb-2'>
+						<h3 className='text-xs font-bold uppercase tracking-widest text-white/80 mb-3'>
 							Protein
 						</h3>
 						<div className='flex flex-wrap gap-2'>
@@ -152,10 +157,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 									key={meat}
 									type='button'
 									onClick={() => handleTagClick(meat)}
-									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+									className={`px-4 py-2 rounded-full text-sm font-semibold transition-all transform ${
 										isTagSelected(meat)
-											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
-											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+											? 'bg-white text-orange-600 shadow-lg scale-105'
+											: 'bg-white/20 text-white backdrop-blur hover:bg-white/30'
 									}`}
 								>
 									{meat}
@@ -166,7 +171,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
 					{/* Taste */}
 					<div>
-						<h3 className='text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-400 mb-2'>
+						<h3 className='text-xs font-bold uppercase tracking-widest text-white/80 mb-3'>
 							Taste
 						</h3>
 						<div className='flex flex-wrap gap-2'>
@@ -175,10 +180,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 									key={taste}
 									type='button'
 									onClick={() => handleTagClick(taste)}
-									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+									className={`px-4 py-2 rounded-full text-sm font-semibold transition-all transform ${
 										isTagSelected(taste)
-											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
-											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+											? 'bg-white text-orange-600 shadow-lg scale-105'
+											: 'bg-white/20 text-white backdrop-blur hover:bg-white/30'
 									}`}
 								>
 									{taste}
@@ -189,7 +194,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
 					{/* Countries */}
 					<div>
-						<h3 className='text-xs font-semibold uppercase text-zinc-700 dark:text-zinc-400 mb-2'>
+						<h3 className='text-xs font-bold uppercase tracking-widest text-white/80 mb-3'>
 							Country
 						</h3>
 						<div className='flex flex-wrap gap-2'>
@@ -198,10 +203,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 									key={country}
 									type='button'
 									onClick={() => handleTagClick(country)}
-									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+									className={`px-4 py-2 rounded-full text-sm font-semibold transition-all transform ${
 										isTagSelected(country)
-											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
-											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+											? 'bg-white text-orange-600 shadow-lg scale-105'
+											: 'bg-white/20 text-white backdrop-blur hover:bg-white/30'
 									}`}
 								>
 									{country}
@@ -211,25 +216,25 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 					</div>
 				</div>
 
-				<div className='grid grid-cols-3 gap-4 text-center text-sm mt-8'>
+				<div className='grid grid-cols-3 gap-4 text-center mt-12 pt-12 border-t border-white/20'>
 					<div>
-						<div className='text-2xl font-bold text-orange-500 mb-1'>
-							{loading ? '...' : '10+'}
+						<div className='text-3xl md:text-4xl font-black text-white mb-1'>
+							{loading ? '∞' : '20+'}
 						</div>
-						<div className='text-zinc-600 dark:text-zinc-400'>Recipes</div>
+						<div className='text-sm text-white/70 font-medium'>Recipes</div>
 					</div>
 					<div>
-						<div className='text-2xl font-bold text-orange-500 mb-1'>Easy</div>
-						<div className='text-zinc-600 dark:text-zinc-400'>To Follow</div>
+						<div className='text-3xl md:text-4xl font-black text-white mb-1'>😋</div>
+						<div className='text-sm text-white/70 font-medium'>Delicious</div>
 					</div>
 					<div>
-						<div className='text-2xl font-bold text-orange-500 mb-1'>Quick</div>
-						<div className='text-zinc-600 dark:text-zinc-400'>Cooking Time</div>
+						<div className='text-3xl md:text-4xl font-black text-white mb-1'>⚡</div>
+						<div className='text-sm text-white/70 font-medium'>Quick</div>
 					</div>
 				</div>
 				
 				{loading && (
-					<div className='text-center mt-4 text-sm text-zinc-500 dark:text-zinc-400'>
+					<div className='text-center mt-6 text-sm text-white/70 font-medium'>
 						Loading recipes...
 					</div>
 				)}

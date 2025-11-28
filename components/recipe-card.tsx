@@ -10,53 +10,92 @@ interface RecipeCardProps {
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, isFavorite, onToggleFavorite }) => {
 	return (
-		<div className='bg-white dark:bg-zinc-800 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow'>
-			<div className='relative h-48 overflow-hidden bg-zinc-200 dark:bg-zinc-700'>
-				<Image
-					src={recipe.image}
-					alt={recipe.name}
-					fill
-					className='object-cover'
-				/>
-			</div>
-			<div className='p-4'>
-				<div className='flex items-start justify-between mb-2'>
-					<h3 className='text-lg font-semibold text-zinc-900 dark:text-white line-clamp-2'>
-						{recipe.name}
-					</h3>
-					<button
-						onClick={() => onToggleFavorite(recipe.slug)}
-						className={`ml-2 text-2xl transition-colors flex-shrink-0 ${
-							isFavorite ? 'text-red-500' : 'text-zinc-300 hover:text-red-500'
-						}`}
-					>
-						♥
-					</button>
-				</div>
-				<p className='text-sm text-zinc-600 dark:text-zinc-400 mb-3 line-clamp-2'>
-					{recipe.description}
-				</p>
-				<div className='flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-3'>
-					<span>⏱️ {recipe.totalTime} min</span>
-					<span>👥 {recipe.servings} servings</span>
-					<span className={`px-2 py-1 rounded-full ${
+		<Link href={`/recipe/${recipe.slug}`}>
+			<div className='group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer h-full flex flex-col'>
+				{/* Image Container */}
+				<div className='relative h-56 overflow-hidden bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800'>
+					<Image
+						src={recipe.image}
+						alt={recipe.name}
+						fill
+						className='object-cover group-hover:scale-110 transition-transform duration-300'
+					/>
+					
+					{/* Overlay Gradient */}
+					<div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent'></div>
+					
+					{/* Difficulty Badge */}
+					<div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md ${
 						recipe.difficulty === 'Easy'
-							? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+							? 'bg-green-500/80 text-white'
 							: recipe.difficulty === 'Medium'
-								? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-								: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+								? 'bg-yellow-500/80 text-white'
+								: 'bg-red-500/80 text-white'
 					}`}>
 						{recipe.difficulty}
-					</span>
+					</div>
+					
+					{/* Favorite Button */}
+					<button
+						onClick={(e) => {
+							e.preventDefault()
+							onToggleFavorite(recipe.slug)
+						}}
+						className={`absolute top-3 left-3 p-2 rounded-full backdrop-blur-md transition-all transform hover:scale-110 ${
+							isFavorite 
+								? 'bg-red-500/80 text-white shadow-lg' 
+								: 'bg-white/20 text-white hover:bg-white/40'
+						}`}
+					>
+						<svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20'>
+							<path d='M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z' />
+						</svg>
+					</button>
 				</div>
-				<Link
-					href={`/recipe/${recipe.slug}`}
-					className='block w-full text-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded transition-colors'
-				>
-					View Recipe
-				</Link>
+				
+				{/* Content */}
+				<div className='p-5 flex-1 flex flex-col'>
+					{/* Title */}
+					<h3 className='text-lg font-bold text-zinc-900 dark:text-white mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors'>
+						{recipe.name}
+					</h3>
+					
+					{/* Description */}
+					<p className='text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-2 flex-1'>
+						{recipe.description}
+					</p>
+					
+					{/* Tags Row */}
+					<div className='flex flex-wrap gap-1 mb-4'>
+						<span className='inline-block px-2 py-0.5 text-xs font-semibold bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-200 rounded-full'>
+							{recipe.tags.meal}
+						</span>
+						<span className='inline-block px-2 py-0.5 text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 rounded-full'>
+							{recipe.tags.meat !== 'None' ? recipe.tags.meat : 'Vegetarian'}
+						</span>
+						<span className='inline-block px-2 py-0.5 text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 rounded-full'>
+							{recipe.tags.country}
+						</span>
+					</div>
+					
+					{/* Footer Stats */}
+					<div className='flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 pt-3 border-t border-zinc-200 dark:border-zinc-700'>
+						<div className='flex items-center gap-1'>
+							<span>⏱️</span>
+							<span className='font-semibold'>{recipe.totalTime}m</span>
+						</div>
+						<div className='flex items-center gap-1'>
+							<span>👥</span>
+							<span className='font-semibold'>{recipe.servings}</span>
+						</div>
+						<div className='flex items-center gap-1'>
+							<span className='text-orange-500'>★</span>
+							<span className='font-semibold'>4.8</span>
+						</div>
+					</div>
+				</div>
 			</div>
-		</div>
+		</Link>
 	)
 }
 

@@ -237,44 +237,52 @@ export const DashboardContent = () => {
 	return (
 		<Page>
 			<Section>
-				<div className='mb-8'>
-					{/* Header */}
-					<div className='flex items-center justify-between mb-8'>
-						<h1 className='text-3xl font-bold text-zinc-900 dark:text-white'>Admin Dashboard</h1>
+				{/* Header with Gradient Background */}
+				<div className='mb-10 pb-8 border-b-2 border-orange-200 dark:border-orange-900'>
+					<div className='flex items-center justify-between'>
+						<div>
+							<h1 className='text-4xl md:text-5xl font-black bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent mb-2'>
+								Recipe Admin
+							</h1>
+							<p className='text-zinc-600 dark:text-zinc-400 font-medium'>Manage your recipe posts and content</p>
+						</div>
 						<button
 							onClick={() => {
 								logout()
 								router.push('/')
 							}}
-							className='px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors'
+							className='px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
 						>
 							Logout
 						</button>
 					</div>
+				</div>
 
-					{/* Tabs */}
-					<div className='flex gap-4 mb-8 border-b border-zinc-300 dark:border-zinc-700'>
-						<button
-							onClick={() => setActiveTab('recipes')}
-							className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
-								activeTab === 'recipes'
-									? 'border-orange-500 text-orange-500'
-									: 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-							}`}
-						>
-							All Recipes ({recipes.length})
-						</button>
-						<button
-							onClick={() => setActiveTab('create')}
-							className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
-								activeTab === 'create'
-									? 'border-orange-500 text-orange-500'
-									: 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-							}`}
-						>
-							Create Recipe
-						</button>
-					</div>
+				{/* Tabs - Modern Design */}
+				<div className='flex gap-1 mb-8 bg-zinc-100 dark:bg-zinc-900/50 p-1 rounded-xl w-fit'>
+					<button
+						onClick={() => setActiveTab('recipes')}
+						className={`px-6 py-3 font-bold rounded-lg transition-all ${
+							activeTab === 'recipes'
+								? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+								: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
+						}`}
+					>
+						📚 All Recipes ({recipes.length})
+					</button>
+					<button
+						onClick={() => setActiveTab('create')}
+						className={`px-6 py-3 font-bold rounded-lg transition-all ${
+							activeTab === 'create'
+								? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+								: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
+						}`}
+					>
+						✨ Create Recipe
+					</button>
+				</div>
+
+				<div className='mb-8'>
 
 				{/* Recipes List Tab */}
 				{activeTab === 'recipes' && (
@@ -297,19 +305,19 @@ export const DashboardContent = () => {
 							<div className='overflow-x-auto rounded-lg border border-zinc-300 dark:border-zinc-700'>
 								<table className='w-full'>
 									<thead className='bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700'>
-										<tr>
-											<th className='px-6 py-4 text-left text-sm font-semibold text-zinc-900 dark:text-white'>Image</th>
-											<th className='px-6 py-4 text-left text-sm font-semibold text-zinc-900 dark:text-white'>Title</th>
-											<th className='px-6 py-4 text-left text-sm font-semibold text-zinc-900 dark:text-white'>Slug</th>
-											<th className='px-6 py-4 text-left text-sm font-semibold text-zinc-900 dark:text-white'>Created</th>
-											<th className='px-6 py-4 text-left text-sm font-semibold text-zinc-900 dark:text-white'>Actions</th>
-										</tr>
+									<tr className='bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-b-2 border-orange-200 dark:border-orange-900'>
+										<th className='px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300'>Image</th>
+										<th className='px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300'>Title</th>
+										<th className='px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300'>Slug</th>
+										<th className='px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300'>Created</th>
+										<th className='px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300'>Actions</th>
+									</tr>
 									</thead>
 									<tbody>
 										{recipes.map((recipe, idx) => (
 											<tr
 												key={recipe.slug}
-												className='border-b border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors'
+												className='border-b border-zinc-200 dark:border-zinc-700 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 transition-all'
 											>
 												{/* Image */}
 												<td className='px-6 py-4'>
