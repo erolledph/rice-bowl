@@ -70,9 +70,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 		// Parse recipes from markdown
 		const parsedRecipes = recipes
-			.filter((r) => r !== null)
+			.filter((r): r is NonNullable<typeof r> => r !== null)
 			.map((r) => parseRecipeMarkdown(r.slug, r.content))
-			.filter((r) => r !== null)
+			.filter((r): r is NonNullable<typeof r> => r !== null)
 
 		res.status(200).json(parsedRecipes)
 	} catch (error) {
