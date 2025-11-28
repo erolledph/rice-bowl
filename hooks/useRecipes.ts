@@ -22,7 +22,8 @@ export interface Recipe {
 	instructions: string[]
 }
 
-const RECIPES: Recipe[] = [
+// Fallback recipes if GitHub API fails
+const FALLBACK_RECIPES: Recipe[] = [
 	{
 		slug: 'korean-kimchi-fermented-vegetables',
 		name: 'Kimchi',
@@ -413,16 +414,41 @@ const RECIPES: Recipe[] = [
 ]
 
 export const useRecipes = () => {
+	const [recipes, setRecipes] = useState<Recipe[]>(FALLBACK_RECIPES)
 	const [favorites, setFavorites] = useState<string[]>([])
 	const [mounted, setMounted] = useState(false)
+	const [loading, setLoading] = useState(true)
 
-	// Load favorites from localStorage on mount
+	// Fetch recipes from API on mount
 	useEffect(() => {
+		const fetchRecipes = async () => {
+			try {
+				const response = await fetch('/api/recipes')
+				if (response.ok) {
+					const data = await response.json()
+					if (Array.isArray(data) && data.length > 0) {
+						setRecipes(data)
+					} else {
+						setRecipes(FALLBACK_RECIPES)
+					}
+				} else {
+					setRecipes(FALLBACK_RECIPES)
+				}
+			} catch (error) {
+				console.error('Failed to fetch recipes from GitHub:', error)
+				setRecipes(FALLBACK_RECIPES)
+			} finally {
+				setLoading(false)
+			}
+		}
+
 		const stored = localStorage.getItem('favorite_recipes')
 		if (stored) {
 			setFavorites(JSON.parse(stored))
 		}
 		setMounted(true)
+
+		fetchRecipes()
 	}, [])
 
 	// Save favorites to localStorage whenever they change
@@ -441,10 +467,10 @@ export const useRecipes = () => {
 	const isFavorite = (recipeSlug: string) => favorites.includes(recipeSlug)
 
 	const getFilteredRecipes = (searchQuery: string) => {
-		if (!searchQuery.trim()) return RECIPES
+		if (!searchQuery.trim()) return recipes
 
 		const query = searchQuery.toLowerCase()
-		return RECIPES.filter(
+		return recipes.filter(
 			(recipe) =>
 				recipe.name.toLowerCase().includes(query) ||
 				recipe.description.toLowerCase().includes(query) ||
@@ -457,7 +483,7 @@ export const useRecipes = () => {
 	}
 
 	const getFavoriteRecipes = () => {
-		return RECIPES.filter((recipe) => favorites.includes(recipe.slug))
+		return recipes.filter((recipe) => favorites.includes(recipe.slug))
 	}
 
 	const getAllTags = () => {
@@ -469,7 +495,7 @@ export const useRecipes = () => {
 			countries: new Set<string>(),
 		}
 
-		RECIPES.forEach((recipe) => {
+		recipes.forEach((recipe) => {
 			tags.meals.add(recipe.tags.meal)
 			recipe.tags.ingredient.forEach((ing) => tags.ingredients.add(ing))
 			if (recipe.tags.meat !== 'None') tags.meats.add(recipe.tags.meat)
@@ -487,12 +513,13 @@ export const useRecipes = () => {
 	}
 
 	return {
-		recipes: RECIPES,
+		recipes,
 		favorites,
 		toggleFavorite,
 		isFavorite,
 		getFilteredRecipes,
 		getFavoriteRecipes,
 		getAllTags,
+		loading,
 	}
 }
