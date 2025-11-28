@@ -3,29 +3,43 @@ import { useRouter } from 'next/router'
 import { useRecipes } from '@/hooks/useRecipes'
 
 interface HeroProps {
-	onSearch?: (query: string) => void
+	onSearch?: (query: string, tags: string[]) => void
 }
 
 const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 	const [searchQuery, setSearchQuery] = useState('')
+	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const router = useRouter()
 	const { getAllTags } = useRecipes()
 	const tags = getAllTags()
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault()
-		if (searchQuery.trim()) {
+		const query = searchQuery.trim() || selectedTags.join(' ')
+		if (query) {
 			if (onSearch) {
-				onSearch(searchQuery)
+				onSearch(query, selectedTags)
 			} else {
-				router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+				router.push(`/search?q=${encodeURIComponent(query)}&tags=${encodeURIComponent(selectedTags.join(','))}`)
 			}
 		}
 	}
 
 	const handleTagClick = (tag: string) => {
-		router.push(`/search?q=${encodeURIComponent(tag)}`)
+		setSelectedTags((prev) => {
+			if (prev.includes(tag)) {
+				return prev.filter((t) => t !== tag)
+			} else {
+				return [...prev, tag]
+			}
+		})
 	}
+
+	const removeTag = (tag: string) => {
+		setSelectedTags((prev) => prev.filter((t) => t !== tag))
+	}
+
+	const isTagSelected = (tag: string) => selectedTags.includes(tag)
 
 	return (
 		<div className='relative bg-gradient-to-b from-orange-50 to-transparent dark:from-zinc-800 dark:to-transparent py-12 px-6'>
@@ -41,19 +55,41 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
 				<form onSubmit={handleSearch} className='mb-10'>
 					<div className='relative'>
-						<input
-							type='text'
-							placeholder='Search for recipes (e.g., pasta, chicken, desserts)...'
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className='w-full px-6 py-4 rounded-full bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 border-2 border-transparent hover:border-orange-300 focus:outline-none focus:border-orange-500 transition-colors shadow-lg'
-						/>
-						<button
-							type='submit'
-							className='absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-colors'
-						>
-							Search
-						</button>
+						<div className='w-full px-6 py-3 rounded-full bg-white dark:bg-zinc-700 border-2 border-transparent hover:border-orange-300 focus-within:border-orange-500 transition-colors shadow-lg flex flex-wrap items-center gap-2'>
+							{/* Selected Tags as Chips */}
+							{selectedTags.map((tag) => (
+								<div
+									key={tag}
+									className='flex items-center gap-1 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 px-3 py-1 rounded-full text-sm font-medium'
+								>
+									<span>{tag}</span>
+									<button
+										type='button'
+										onClick={() => removeTag(tag)}
+										className='ml-1 text-orange-600 dark:text-orange-300 hover:text-orange-800 dark:hover:text-orange-200 font-bold'
+									>
+										×
+									</button>
+								</div>
+							))}
+
+							{/* Search Input */}
+							<input
+								type='text'
+								placeholder={selectedTags.length > 0 ? 'Add more...' : 'Search for recipes (e.g., pasta, chicken, desserts)...'}
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className='flex-1 min-w-0 bg-transparent text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none'
+							/>
+
+							{/* Search Button */}
+							<button
+								type='submit'
+								className='px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-colors whitespace-nowrap'
+							>
+								Search
+							</button>
+						</div>
 					</div>
 				</form>
 
@@ -68,8 +104,13 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 							{tags.meals.slice(0, 4).map((meal) => (
 								<button
 									key={meal}
+									type='button'
 									onClick={() => handleTagClick(meal)}
-									className='px-3 py-1 rounded-full text-xs bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors border border-zinc-200 dark:border-zinc-600'
+									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+										isTagSelected(meal)
+											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
+											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+									}`}
 								>
 									{meal}
 								</button>
@@ -86,8 +127,13 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 							{tags.ingredients.slice(0, 5).map((ingredient) => (
 								<button
 									key={ingredient}
+									type='button'
 									onClick={() => handleTagClick(ingredient)}
-									className='px-3 py-1 rounded-full text-xs bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors border border-zinc-200 dark:border-zinc-600'
+									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+										isTagSelected(ingredient)
+											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
+											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+									}`}
 								>
 									{ingredient}
 								</button>
@@ -104,8 +150,13 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 							{tags.meats.map((meat) => (
 								<button
 									key={meat}
+									type='button'
 									onClick={() => handleTagClick(meat)}
-									className='px-3 py-1 rounded-full text-xs bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors border border-zinc-200 dark:border-zinc-600'
+									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+										isTagSelected(meat)
+											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
+											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+									}`}
 								>
 									{meat}
 								</button>
@@ -122,8 +173,13 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 							{tags.tastes.map((taste) => (
 								<button
 									key={taste}
+									type='button'
 									onClick={() => handleTagClick(taste)}
-									className='px-3 py-1 rounded-full text-xs bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors border border-zinc-200 dark:border-zinc-600'
+									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+										isTagSelected(taste)
+											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
+											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+									}`}
 								>
 									{taste}
 								</button>
@@ -140,8 +196,13 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 							{tags.countries.map((country) => (
 								<button
 									key={country}
+									type='button'
 									onClick={() => handleTagClick(country)}
-									className='px-3 py-1 rounded-full text-xs bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors border border-zinc-200 dark:border-zinc-600'
+									className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+										isTagSelected(country)
+											? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-600 dark:border-orange-700'
+											: 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-600 hover:bg-orange-100 dark:hover:bg-orange-900'
+									}`}
 								>
 									{country}
 								</button>
