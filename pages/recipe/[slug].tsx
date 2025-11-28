@@ -3,15 +3,28 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Page from '@/components/page'
 import Section from '@/components/section'
+import RecipeSkeleton from '@/components/recipe-skeleton'
 import { useRecipes } from '@/hooks/useRecipes'
 
 const RecipeDetail = () => {
 	const router = useRouter()
 	const { slug } = router.query
-	const { recipes, toggleFavorite, isFavorite } = useRecipes()
+	const { recipes, loading, toggleFavorite, isFavorite } = useRecipes()
+
+	// Show skeleton while data is loading
+	if (loading) {
+		return (
+			<Page>
+				<Section>
+					<RecipeSkeleton />
+				</Section>
+			</Page>
+		)
+	}
 
 	const recipe = recipes.find((r) => r.slug === slug)
 
+	// Show 404 only after loading completes and recipe is not found
 	if (!recipe) {
 		return (
 			<Page>
