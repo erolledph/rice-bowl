@@ -10,7 +10,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const router = useRouter()
-	const { getAllTags } = useRecipes()
+	const { getAllTags, loading } = useRecipes()
 	const tags = getAllTags()
 
 	const handleSearch = (e: React.FormEvent) => {
@@ -213,7 +213,9 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
 				<div className='grid grid-cols-3 gap-4 text-center text-sm mt-8'>
 					<div>
-						<div className='text-2xl font-bold text-orange-500 mb-1'>10+</div>
+						<div className='text-2xl font-bold text-orange-500 mb-1'>
+							{loading ? '...' : '10+'}
+						</div>
 						<div className='text-zinc-600 dark:text-zinc-400'>Recipes</div>
 					</div>
 					<div>
@@ -225,6 +227,12 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 						<div className='text-zinc-600 dark:text-zinc-400'>Cooking Time</div>
 					</div>
 				</div>
+				
+				{loading && (
+					<div className='text-center mt-4 text-sm text-zinc-500 dark:text-zinc-400'>
+						Loading recipes...
+					</div>
+				)}
 			</div>
 		</div>
 	)
