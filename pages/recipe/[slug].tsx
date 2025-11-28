@@ -29,7 +29,7 @@ const RecipeDetail = () => {
 			const canvas = await html2canvas(contentRef.current, {
 				scale: 2,
 				useCORS: true,
-				loggingEnabled: false,
+				logging: false,
 			})
 
 			// Download as image
@@ -229,7 +229,7 @@ const RecipeDetail = () => {
 					{/* Ingredients Section */}
 					<div className='print-content mb-8'>
 						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-4'>
-							🛒 Ingredients
+							Ingredients
 						</h2>
 						<div className='ingredients-list bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg'>
 							<ul className='space-y-2'>
@@ -249,7 +249,7 @@ const RecipeDetail = () => {
 					{/* Instructions Section */}
 					<div className='print-content mb-12'>
 						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-4'>
-							👨‍🍳 Instructions
+							Instructions
 						</h2>
 						<div className='instructions-list bg-zinc-50 dark:bg-zinc-800 p-6 rounded-lg'>
 							<ol className='space-y-3'>
