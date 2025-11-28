@@ -38,28 +38,29 @@ const SearchPage = () => {
 		<Page>
 			<Section>
 				{/* Header */}
-				<div className='mb-8'>
-					<Link href='/' className='text-orange-500 hover:text-orange-600 font-semibold mb-4 inline-block'>
-						← Back to Home
+				<div className='mb-12'>
+					<Link href='/' className='inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-bold mb-4 group'>
+						<span className='transform group-hover:-translate-x-1 transition-transform'>←</span>
+						Back Home
 					</Link>
-					<h1 className='text-4xl font-bold text-zinc-900 dark:text-white mb-2'>
+					<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
 						Search Results
 					</h1>
-					<p className='text-lg text-zinc-600 dark:text-zinc-400'>
+					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium'>
 						{searchQuery || selectedTags.length > 0
-							? `Showing results for "${searchQuery || selectedTags.join(', ')}"`
+							? `Found ${results.length} recipe${results.length !== 1 ? 's' : ''}`
 							: 'Enter a search query'}
 					</p>
 
 					{/* Active Tags Display */}
 					{selectedTags.length > 0 && (
-						<div className='mt-4 flex flex-wrap gap-2'>
+						<div className='mt-6 flex flex-wrap gap-2 pb-4 border-b border-orange-200 dark:border-orange-900'>
 							{selectedTags.map((tag) => (
 								<div
 									key={tag}
-									className='inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 px-3 py-1 rounded-full text-sm font-medium'
+									className='inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 text-orange-900 dark:text-orange-100 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm'
 								>
-									<span>{tag}</span>
+									<span>🏷️ {tag}</span>
 									<button
 										onClick={() => {
 											const newTags = selectedTags.filter((t) => t !== tag)
@@ -69,7 +70,7 @@ const SearchPage = () => {
 												router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
 											}
 										}}
-										className='text-orange-600 dark:text-orange-300 hover:text-orange-800 dark:hover:text-orange-200 font-bold'
+										className='ml-1 text-orange-600 dark:text-orange-300 hover:text-orange-800 dark:hover:text-orange-200 font-bold hover:scale-125 transition-transform'
 									>
 										×
 									</button>
@@ -86,7 +87,7 @@ const SearchPage = () => {
 
 				{/* Results Grid */}
 				{results.length > 0 ? (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
 						{results.map((recipe) => (
 							<RecipeCard
 								key={recipe.slug}
@@ -97,17 +98,21 @@ const SearchPage = () => {
 						))}
 					</div>
 				) : (
-					<div className='text-center py-12'>
-						<p className='text-zinc-600 dark:text-zinc-400 mb-6'>
+					<div className='text-center py-20'>
+						<div className='text-6xl mb-4'>🍳</div>
+						<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>
 							{searchQuery || selectedTags.length > 0
 								? 'No recipes found matching your search'
 								: 'Try searching for recipes by name, ingredients, or cuisine'}
 						</p>
+						<p className='text-zinc-500 dark:text-zinc-500 mb-8'>
+							Browse all recipes or adjust your filters
+						</p>
 						<Link
 							href='/'
-							className='inline-block px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors'
+							className='inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl'
 						>
-							Back to Home
+							← Back to Recipes
 						</Link>
 					</div>
 				)}
