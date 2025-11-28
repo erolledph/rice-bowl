@@ -72,7 +72,7 @@ const Recipes = () => {
 			<Section>
 				<div className='mb-8'>
 					<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
-						🍳 All Recipes
+						All Recipes
 					</h1>
 					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-8'>
 						Discover and explore our collection of delicious recipes

@@ -2,7 +2,8 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Printer, Heart } from 'lucide-react'
+import { Printer, Heart, Download } from 'lucide-react'
+import { useRef, useState } from 'react'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeSkeleton from '@/components/recipe-skeleton'
@@ -14,6 +15,40 @@ const RecipeDetail = () => {
 	const router = useRouter()
 	const { slug } = router.query
 	const { recipes, loading, toggleFavorite, isFavorite } = useRecipes()
+	const contentRef = useRef<HTMLDivElement>(null)
+	const [downloading, setDownloading] = useState(false)
+
+	const handleDownloadRecipe = async () => {
+		if (!contentRef.current) return
+
+		try {
+			setDownloading(true)
+			// Dynamically import html2canvas
+			const html2canvas = (await import('html2canvas')).default
+
+			const canvas = await html2canvas(contentRef.current, {
+				scale: 2,
+				useCORS: true,
+				loggingEnabled: false,
+			})
+
+			// Download as image
+			const link = document.createElement('a')
+			link.href = canvas.toDataURL('image/png')
+			link.download = `${recipe?.slug || 'recipe'}.png`
+			link.click()
+
+			// Show alert for multi-page support
+			if (contentRef.current.scrollHeight > canvas.height) {
+				alert('Recipe saved! Note: For best results with long recipes, consider printing to PDF (use Print button and select "Save as PDF")')
+			}
+		} catch (error) {
+			console.error('Download failed:', error)
+			alert('Download failed. Please try again.')
+		} finally {
+			setDownloading(false)
+		}
+	}
 
 	// Show skeleton while data is loading
 	if (loading) {
@@ -125,33 +160,43 @@ const RecipeDetail = () => {
 				/>
 			</Head>
 
-			<Page>
-				<Section>
-					{/* Action Buttons - Above Image */}
-					<div className='print-buttons flex gap-2 justify-end mb-4'>
-						{/* Print Button */}
-						<button
-							onClick={() => window.print()}
-							className='p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-all hover:scale-110'
-							title='Print this recipe'
-						>
-							<Printer className='w-6 h-6' />
-						</button>
+		<Page>
+			<Section>
+				{/* Action Buttons - Above Image */}
+				<div className='print-buttons flex gap-2 justify-end mb-4'>
+					{/* Download Button */}
+					<button
+						onClick={handleDownloadRecipe}
+						disabled={downloading}
+						className='p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-full shadow-lg transition-all hover:scale-110'
+						title='Download recipe as image'
+					>
+						<Download className={`w-6 h-6 ${downloading ? 'animate-spin' : ''}`} />
+					</button>
 
-						{/* Favorite Button */}
-						<button
-							onClick={() => toggleFavorite(recipe.slug)}
-							className={`p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
-								isFav
-									? 'bg-red-500 hover:bg-red-600 text-white'
-									: 'bg-zinc-300 hover:bg-zinc-400 text-zinc-900'
-							}`}
-							title={isFav ? 'Remove from favorites' : 'Add to favorites'}
-						>
-							<Heart className='w-6 h-6' fill={isFav ? 'currentColor' : 'none'} />
-						</button>
-					</div>
+					{/* Print Button */}
+					<button
+						onClick={() => window.print()}
+						className='p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-all hover:scale-110'
+						title='Print this recipe'
+					>
+						<Printer className='w-6 h-6' />
+					</button>
 
+					{/* Favorite Button */}
+					<button
+						onClick={() => toggleFavorite(recipe.slug)}
+						className={`p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
+							isFav
+								? 'bg-red-500 hover:bg-red-600 text-white'
+								: 'bg-zinc-300 hover:bg-zinc-400 text-zinc-900'
+						}`}
+						title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+					>
+						<Heart className='w-6 h-6' fill={isFav ? 'currentColor' : 'none'} />
+					</button>
+				</div>				{/* Content wrapper for download */}
+				<div ref={contentRef} className='bg-white dark:bg-zinc-900'>
 					{/* Hero Image */}
 					<div className='print-content relative h-96 w-full mb-8 rounded-2xl overflow-hidden shadow-2xl'>
 						<Image
@@ -162,9 +207,7 @@ const RecipeDetail = () => {
 							priority
 						/>
 						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent print:hidden'></div>
-					</div>
-
-					{/* Header */}
+					</div>					{/* Header */}
 					<div className='print-content mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
 						<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
 							{recipe.name}
@@ -233,8 +276,7 @@ const RecipeDetail = () => {
 							url={recipeUrl}
 						/>
 					</div>
-
-					{/* Back Button - Only at bottom */}
+				</div>					{/* Back Button - Only at bottom */}
 					<div className='back-button mt-12 flex justify-center'>
 						<button
 							onClick={() => window.history.back()}

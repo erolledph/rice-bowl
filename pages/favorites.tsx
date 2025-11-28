@@ -75,13 +75,7 @@ const FavoritesPage = () => {
 		<Page>
 			<Section>
 				<div className='mb-8'>
-					{/* Header */}
-					<Link href='/' className='inline-flex items-center gap-1 text-orange-600 hover:text-orange-700 font-bold mb-4 group'>
-						<span className='transform group-hover:-translate-x-1 transition-transform'>←</span>
-						Back Home
-					</Link>
 				<div className='flex items-center gap-3 mb-3'>
-					<Heart className='w-12 h-12 text-orange-600 fill-orange-600' />
 					<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent'>
 						My Favorite Recipes
 					</h1>

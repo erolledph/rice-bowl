@@ -1,8 +1,12 @@
 const RecipeSkeleton = () => {
 	return (
 		<div className='animate-pulse'>
-			{/* Back Link Skeleton */}
-			<div className='mb-6 h-6 w-24 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:from-zinc-700 dark:to-zinc-600 rounded'></div>
+			{/* Action Buttons Skeleton */}
+			<div className='flex gap-2 justify-end mb-4'>
+				<div className='w-12 h-12 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:from-zinc-700 dark:to-zinc-600 rounded-full'></div>
+				<div className='w-12 h-12 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:from-zinc-700 dark:to-zinc-600 rounded-full'></div>
+				<div className='w-12 h-12 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:from-zinc-700 dark:to-zinc-600 rounded-full'></div>
+			</div>
 
 			{/* Hero Image Skeleton */}
 			<div className='relative h-96 w-full mb-8 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-r from-zinc-200 to-zinc-100 dark:from-zinc-700 dark:to-zinc-600'></div>
