@@ -215,29 +215,6 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 						</div>
 					</div>
 				</div>
-
-				<div className='grid grid-cols-3 gap-4 text-center mt-12 pt-12 border-t border-white/20'>
-					<div>
-						<div className='text-3xl md:text-4xl font-black text-white mb-1'>
-							{loading ? '∞' : '20+'}
-						</div>
-						<div className='text-sm text-white/70 font-medium'>Recipes</div>
-					</div>
-					<div>
-						<div className='text-3xl md:text-4xl font-black text-white mb-1'>😋</div>
-						<div className='text-sm text-white/70 font-medium'>Delicious</div>
-					</div>
-					<div>
-						<div className='text-3xl md:text-4xl font-black text-white mb-1'>⚡</div>
-						<div className='text-sm text-white/70 font-medium'>Quick</div>
-					</div>
-				</div>
-				
-				{loading && (
-					<div className='text-center mt-6 text-sm text-white/70 font-medium'>
-						Loading recipes...
-					</div>
-				)}
 			</div>
 		</div>
 	)

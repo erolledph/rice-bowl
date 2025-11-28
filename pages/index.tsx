@@ -1,34 +1,42 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import Page from '@/components/page'
+import Head from 'next/head'
+import Appbar from '@/components/appbar'
+import BottomNav from '@/components/bottom-nav'
 import Hero from '@/components/hero'
-import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
 import { useRecipes } from '@/hooks/useRecipes'
 
 const Index = () => {
 	const { recipes, toggleFavorite, isFavorite } = useRecipes()
-	const featuredRecipes = recipes.slice(0, 6)
+	const featuredRecipes = recipes.slice(0, 12)
 
 	return (
-		<Page>
+		<>
+			<Head>
+				<title>Rice Bowl | Home</title>
+			</Head>
+
+			<Appbar />
+
+			<main className='mx-auto min-h-screen bg-white dark:bg-zinc-900 pt-20 pb-24 sm:pb-0'>
 			<Hero />
-			<Section>
-				{/* Featured Recipes Section */}
-				<div className='mb-16'>
+
+			{/* Featured Recipes Section - Full Width Airbnb Style */}
+			<div className='w-full py-12 px-6 md:px-10 lg:px-20'>
+				<div className='max-w-[2520px] mx-auto'>
 					<div className='mb-8'>
-						<span className='text-sm font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider'>✨ FEATURED</span>
-						<h2 className='text-4xl md:text-5xl font-black text-zinc-900 dark:text-white mt-2 mb-3'>
-							Trending Now
+						<h2 className='text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-2'>
+							Featured recipes
 						</h2>
-						<p className='text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl'>
-							Discover our most loved recipes, handpicked for flavor and simplicity
+						<p className='text-zinc-600 dark:text-zinc-400'>
+							Popular picks for your next meal
 						</p>
 					</div>
 
-					{/* Featured Grid */}
+					{/* Featured Grid - Responsive Airbnb-style */}
 					{featuredRecipes.length > 0 ? (
-						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12'>
+						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'>
 							{featuredRecipes.map((recipe) => (
 								<RecipeCard
 									key={recipe.slug}
@@ -38,71 +46,39 @@ const Index = () => {
 								/>
 							))}
 						</div>
-					) : null}
+					) : (
+						<div className='text-center py-20'>
+							<p className='text-zinc-500 dark:text-zinc-400'>Loading recipes...</p>
+						</div>
+					)}
+				</div>
+			</div>
 
-					{/* CTA Button */}
-					<div className='text-center'>
+			{/* Browse All Section */}
+			<div className='w-full py-12 px-6 md:px-10 lg:px-20 bg-zinc-50 dark:bg-zinc-900/50'>
+				<div className='max-w-[2520px] mx-auto'>
+					<div className='flex flex-col md:flex-row items-center justify-between gap-6'>
+						<div className='flex-1'>
+							<h2 className='text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-2'>
+								Explore more recipes
+							</h2>
+							<p className='text-zinc-600 dark:text-zinc-400'>
+								Browse our entire collection and find your next favorite dish
+							</p>
+						</div>
 						<Link
 							href='/recipes'
-							className='inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
+							className='inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
 						>
-							Explore All Recipes
-							<span>→</span>
+							View all recipes
 						</Link>
 					</div>
 				</div>
+			</div>
+			</main>
 
-				{/* Magazine-style divider */}
-				<div className='my-16 border-t-2 border-orange-200 dark:border-orange-900'></div>
-
-				{/* Why Choose Us Section */}
-				<div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-16'>
-					<div className='text-center'>
-						<div className='text-5xl mb-4'>🍴</div>
-						<h3 className='text-xl font-bold text-zinc-900 dark:text-white mb-2'>
-							Easy to Follow
-						</h3>
-						<p className='text-zinc-600 dark:text-zinc-400'>
-							Step-by-step instructions that anyone can follow, from beginners to pros
-						</p>
-					</div>
-					<div className='text-center'>
-						<div className='text-5xl mb-4'>🌍</div>
-						<h3 className='text-xl font-bold text-zinc-900 dark:text-white mb-2'>
-							World Cuisines
-						</h3>
-						<p className='text-zinc-600 dark:text-zinc-400'>
-							Explore authentic recipes from different cuisines around the globe
-						</p>
-					</div>
-					<div className='text-center'>
-						<div className='text-5xl mb-4'>💝</div>
-						<h3 className='text-xl font-bold text-zinc-900 dark:text-white mb-2'>
-							Save Favorites
-						</h3>
-						<p className='text-zinc-600 dark:text-zinc-400'>
-							Bookmark recipes you love for easy access anytime, anywhere
-						</p>
-					</div>
-				</div>
-
-				{/* Call to Action Banner */}
-				<div className='bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 md:p-12 text-white text-center'>
-					<h3 className='text-3xl md:text-4xl font-black mb-3'>
-						🎉 Start Cooking Today
-					</h3>
-					<p className='text-lg text-white/90 mb-6'>
-						Find your next favorite recipe and impress with amazing dishes
-					</p>
-					<Link
-						href='/recipes'
-						className='inline-block px-8 py-3 bg-white text-orange-600 font-bold rounded-lg hover:bg-orange-50 transition-all transform hover:scale-105'
-					>
-						Browse Recipes →
-					</Link>
-				</div>
-			</Section>
-		</Page>
+			<BottomNav />
+		</>
 	)
 }
 
