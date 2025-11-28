@@ -156,8 +156,9 @@ const RecipeDetail = () => {
 							alt={recipe.name}
 							fill
 							className='object-cover'
+							priority
 						/>
-						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'></div>
+						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent print:hidden'></div>
 					</div>
 
 					{/* Header */}

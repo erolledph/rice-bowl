@@ -50,6 +50,12 @@ body {
 		color: black;
 	}
 
+	* {
+		background: transparent !important;
+		color: black !important;
+		box-shadow: none !important;
+	}
+
 	/* Hide elements from printing */
 	.no-print,
 	header,
@@ -82,13 +88,34 @@ body {
 		page-break-after: avoid;
 	}
 
+	/* Important: Show images in print */
 	img {
-		max-width: 100%;
+		max-width: 100% !important;
 		page-break-inside: avoid;
+		display: block !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+		background: white !important;
+	}
+
+	/* Ensure image containers are visible */
+	.relative {
+		page-break-inside: avoid;
+		background: white !important;
 	}
 
 	.ingredients-list,
 	.instructions-list {
 		page-break-inside: avoid;
+	}
+
+	/* Force text colors for readability */
+	p, li, span, h1, h2, h3, h4, h5, h6 {
+		color: black !important;
+	}
+
+	/* Print friendly borders */
+	border {
+		color: #333 !important;
 	}
 }
