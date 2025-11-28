@@ -121,18 +121,6 @@ const SearchFilterBar = ({
 				</button>
 			</div>
 
-			{/* Result Count */}
-			<div className='text-sm text-zinc-600 dark:text-zinc-400 font-medium'>
-				{resultCount > 0 ? (
-					<span>
-						Found <span className='text-orange-600 dark:text-orange-400 font-bold'>{resultCount}</span> recipe
-						{resultCount !== 1 ? 's' : ''}
-					</span>
-				) : (
-					<span className='text-zinc-500'>No recipes found</span>
-				)}
-			</div>
-
 			{/* Filter Panel */}
 			{showFilters && (
 				<div className='bg-gradient-to-br from-orange-50 to-orange-50/50 dark:from-orange-950/20 dark:to-orange-900/10 rounded-xl p-6 border border-orange-200 dark:border-orange-800/30 space-y-4'>
