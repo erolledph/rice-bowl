@@ -30,7 +30,7 @@ interface NewRecipeForm {
 export const DashboardContent = () => {
 	const router = useRouter()
 	const { isLoggedIn, logout, gitHubOwner, gitHubRepo, gitHubToken } = useAdmin()
-	const { recipes } = useRecipes()
+	const { recipes, refetchRecipes } = useRecipes()
 	const [activeTab, setActiveTab] = useState<'recipes' | 'create'>('recipes')
 	const [loading, setLoading] = useState(false)
 	const [message, setMessage] = useState('')
@@ -158,6 +158,10 @@ export const DashboardContent = () => {
 						gitHubRepo,
 						gitHubToken
 					)
+					
+					// Refetch recipes to show the new one immediately
+					await refetchRecipes()
+					
 					setMessage(`✅ Recipe "${newRecipe.name}" created and committed to GitHub!`)
 					setMessageType('success')
 				} catch (githubError) {

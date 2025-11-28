@@ -451,6 +451,24 @@ export const useRecipes = () => {
 		fetchRecipes()
 	}, [])
 
+	// Refetch recipes function
+	const refetchRecipes = async () => {
+		setLoading(true)
+		try {
+			const response = await fetch('/api/recipes')
+			if (response.ok) {
+				const data = await response.json()
+				if (Array.isArray(data) && data.length > 0) {
+					setRecipes(data)
+				}
+			}
+		} catch (error) {
+			console.error('Failed to refetch recipes:', error)
+		} finally {
+			setLoading(false)
+		}
+	}
+
 	// Save favorites to localStorage whenever they change
 	useEffect(() => {
 		if (mounted) {
@@ -521,5 +539,6 @@ export const useRecipes = () => {
 		getFavoriteRecipes,
 		getAllTags,
 		loading,
+		refetchRecipes,
 	}
 }
