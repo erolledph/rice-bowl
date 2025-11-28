@@ -5,6 +5,7 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
 import SearchFilterBar from '@/components/search-filter-bar'
+import RecipeCardsSkeleton from '@/components/recipe-cards-skeleton'
 import { useRecipes } from '@/hooks/useRecipes'
 
 const SearchPage = () => {
@@ -17,7 +18,7 @@ const SearchPage = () => {
 	const [meatFilters, setMeatFilters] = useState<string[]>([])
 	const [tasteFilters, setTasteFilters] = useState<string[]>([])
 
-	const { getFilteredRecipes, toggleFavorite, isFavorite, getAllTags } = useRecipes()
+	const { getFilteredRecipes, toggleFavorite, isFavorite, getAllTags, loading } = useRecipes()
 
 	const tags = getAllTags()
 	const allResults = getFilteredRecipes(searchQuery)
@@ -104,7 +105,9 @@ const SearchPage = () => {
 				</div>
 
 				{/* Results Grid */}
-				{results.length > 0 ? (
+				{loading ? (
+					<RecipeCardsSkeleton count={8} />
+				) : results.length > 0 ? (
 					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
 						{results.map((recipe) => (
 							<RecipeCard
@@ -130,7 +133,7 @@ const SearchPage = () => {
 							href='/recipes'
 							className='inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl'
 						>
-							← Browse All Recipes
+							Browse All Recipes
 						</Link>
 					</div>
 				)}
