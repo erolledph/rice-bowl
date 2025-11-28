@@ -4,6 +4,7 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
 import SearchFilterBar from '@/components/search-filter-bar'
+import RecipeCardsSkeleton from '@/components/recipe-cards-skeleton'
 import { useRecipes } from '@/hooks/useRecipes'
 
 const FavoritesPage = () => {
@@ -14,7 +15,7 @@ const FavoritesPage = () => {
 	const [meatFilters, setMeatFilters] = useState<string[]>([])
 	const [tasteFilters, setTasteFilters] = useState<string[]>([])
 
-	const { getFavoriteRecipes, toggleFavorite, isFavorite, getAllTags } = useRecipes()
+	const { getFavoriteRecipes, loading, toggleFavorite, isFavorite, getAllTags } = useRecipes()
 
 	const tags = getAllTags()
 	const favoriteRecipes = getFavoriteRecipes()
@@ -108,19 +109,23 @@ const FavoritesPage = () => {
 						resultCount={filteredRecipes.length}
 					/>
 
-					{/* Recipes Grid */}
-					{filteredRecipes.length > 0 ? (
-						<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-							{filteredRecipes.map((recipe) => (
-								<RecipeCard
-									key={recipe.slug}
-									recipe={recipe}
-									isFavorite={isFavorite(recipe.slug)}
-									onToggleFavorite={toggleFavorite}
-								/>
-							))}
-						</div>
-					) : favoriteRecipes.length === 0 ? (
+				{/* Recipes Grid */}
+				{loading ? (
+					<div className='mt-12'>
+						<RecipeCardsSkeleton count={6} />
+					</div>
+				) : filteredRecipes.length > 0 ? (
+					<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+						{filteredRecipes.map((recipe) => (
+							<RecipeCard
+								key={recipe.slug}
+								recipe={recipe}
+								isFavorite={isFavorite(recipe.slug)}
+								onToggleFavorite={toggleFavorite}
+							/>
+						))}
+					</div>
+				) : favoriteRecipes.length === 0 ? (
 						<div className='text-center py-20'>
 							<div className='text-6xl mb-4'>🍽️</div>
 							<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>

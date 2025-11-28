@@ -3,6 +3,7 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
 import SearchFilterBar from '@/components/search-filter-bar'
+import RecipeCardsSkeleton from '@/components/recipe-cards-skeleton'
 import { useRecipes } from '@/hooks/useRecipes'
 
 const Recipes = () => {
@@ -12,7 +13,7 @@ const Recipes = () => {
 	const [countryFilters, setCountryFilters] = useState<string[]>([])
 	const [meatFilters, setMeatFilters] = useState<string[]>([])
 	const [tasteFilters, setTasteFilters] = useState<string[]>([])
-	const { recipes, toggleFavorite, isFavorite, getAllTags } = useRecipes()
+	const { recipes, loading, toggleFavorite, isFavorite, getAllTags } = useRecipes()
 
 	const tags = getAllTags()
 
@@ -65,7 +66,7 @@ const Recipes = () => {
 		return results
 	}, [searchQuery, mealFilters, ingredientFilters, countryFilters, meatFilters, tasteFilters, recipes])
 
-	return (
+			return (
 		<Page>
 			<Section>
 				<div className='mb-8'>
@@ -97,33 +98,39 @@ const Recipes = () => {
 					allMeats={tags.meats}
 					allTastes={tags.tastes}
 					resultCount={filteredRecipes.length}
-				/>					{/* Recipe Cards Grid */}
-					{filteredRecipes.length > 0 ? (
-						<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-							{filteredRecipes.map((recipe) => (
-								<RecipeCard
-									key={recipe.slug}
-									recipe={recipe}
-									isFavorite={isFavorite(recipe.slug)}
-									onToggleFavorite={toggleFavorite}
-								/>
-							))}
-						</div>
-					) : (
-						<div className='text-center py-20'>
-							<div className='text-6xl mb-4'>🔍</div>
-							<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>
-								No recipes found matching your criteria
-							</p>
-							<p className='text-zinc-500 dark:text-zinc-500 mb-8'>
-								Try adjusting your search or filters
-							</p>
-						</div>
-					)}
-				</div>
-			</Section>
-		</Page>
-	)
+				/>
+
+				{/* Recipe Cards Grid */}
+				{loading ? (
+					<div className='mt-12'>
+						<RecipeCardsSkeleton count={6} />
+					</div>
+				) : filteredRecipes.length > 0 ? (
+					<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+						{filteredRecipes.map((recipe) => (
+							<RecipeCard
+								key={recipe.slug}
+								recipe={recipe}
+								isFavorite={isFavorite(recipe.slug)}
+								onToggleFavorite={toggleFavorite}
+							/>
+						))}
+					</div>
+				) : (
+					<div className='text-center py-20'>
+						<div className='text-6xl mb-4'>🔍</div>
+						<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4 font-medium'>
+							No recipes found matching your criteria
+						</p>
+						<p className='text-zinc-500 dark:text-zinc-500 mb-8'>
+							Try adjusting your search or filters
+						</p>
+					</div>
+				)}
+			</div>
+		</Section>
+	</Page>
+)
 }
 
 export default Recipes
