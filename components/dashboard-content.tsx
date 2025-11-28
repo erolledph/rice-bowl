@@ -394,7 +394,7 @@ export const DashboardContent = () => {
 																	servings: recipe.servings,
 																	cookTime: recipe.cookTime,
 																	prepTime: recipe.prepTime,
-																	difficulty: recipe.difficulty,
+																	difficulty: recipe.difficulty as 'Easy' | 'Medium' | 'Hard',
 																	image: recipe.image,
 																	mealType: recipe.tags.meal,
 																	protein: recipe.tags.meat,
