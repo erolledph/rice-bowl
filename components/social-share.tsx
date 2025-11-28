@@ -1,4 +1,5 @@
-import { useState } from 'react'\nimport { Share2, MessageCircle, Mail, Link as LinkIcon, Check } from 'lucide-react'
+import { useState } from 'react'
+import { Share2, MessageCircle, Mail, Link as LinkIcon, Check } from 'lucide-react'
 
 interface SocialShareProps {
 	title: string
