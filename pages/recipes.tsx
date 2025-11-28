@@ -7,19 +7,17 @@ import { useRecipes } from '@/hooks/useRecipes'
 
 const Recipes = () => {
 	const [searchQuery, setSearchQuery] = useState('')
-	const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
 	const [mealFilters, setMealFilters] = useState<string[]>([])
 	const [ingredientFilters, setIngredientFilters] = useState<string[]>([])
 	const [countryFilters, setCountryFilters] = useState<string[]>([])
 	const [meatFilters, setMeatFilters] = useState<string[]>([])
 	const [tasteFilters, setTasteFilters] = useState<string[]>([])
-	const { recipes, toggleFavorite, isFavorite, getFavoriteRecipes, getAllTags } = useRecipes()
+	const { recipes, toggleFavorite, isFavorite, getAllTags } = useRecipes()
 
 	const tags = getAllTags()
-	const favoriteRecipes = getFavoriteRecipes()
 
 	const filteredRecipes = useMemo(() => {
-		let results = showFavoritesOnly ? favoriteRecipes : recipes
+		let results = recipes
 
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase()
@@ -65,7 +63,7 @@ const Recipes = () => {
 		}
 
 		return results
-	}, [searchQuery, showFavoritesOnly, mealFilters, ingredientFilters, countryFilters, meatFilters, tasteFilters, recipes, favoriteRecipes])
+	}, [searchQuery, mealFilters, ingredientFilters, countryFilters, meatFilters, tasteFilters, recipes])
 
 	return (
 		<Page>
@@ -78,33 +76,28 @@ const Recipes = () => {
 						Discover and explore our collection of delicious recipes
 					</p>
 
-					{/* Search and Filter Bar */}
-					<SearchFilterBar
-						searchQuery={searchQuery}
-						onSearchChange={setSearchQuery}
-						showFavoritesButton={true}
-						showFavoritesOnly={showFavoritesOnly}
-						onFavoritesToggle={setShowFavoritesOnly}
-						favoriteCount={favoriteRecipes.length > 0 ? favoriteRecipes.length : 0}
-						mealFilters={mealFilters}
-						onMealFiltersChange={setMealFilters}
-						ingredientFilters={ingredientFilters}
-						onIngredientFiltersChange={setIngredientFilters}
-						countryFilters={countryFilters}
-						onCountryFiltersChange={setCountryFilters}
-						meatFilters={meatFilters}
-						onMeatFiltersChange={setMeatFilters}
-						tasteFilters={tasteFilters}
-						onTasteFiltersChange={setTasteFilters}
-						allMeals={tags.meals}
-						allIngredients={tags.ingredients}
-						allCountries={tags.countries}
-						allMeats={tags.meats}
-						allTastes={tags.tastes}
-						resultCount={filteredRecipes.length}
-					/>
-
-					{/* Recipe Cards Grid */}
+				{/* Search and Filter Bar */}
+				<SearchFilterBar
+					searchQuery={searchQuery}
+					onSearchChange={setSearchQuery}
+					showFavoritesButton={false}
+					mealFilters={mealFilters}
+					onMealFiltersChange={setMealFilters}
+					ingredientFilters={ingredientFilters}
+					onIngredientFiltersChange={setIngredientFilters}
+					countryFilters={countryFilters}
+					onCountryFiltersChange={setCountryFilters}
+					meatFilters={meatFilters}
+					onMeatFiltersChange={setMeatFilters}
+					tasteFilters={tasteFilters}
+					onTasteFiltersChange={setTasteFilters}
+					allMeals={tags.meals}
+					allIngredients={tags.ingredients}
+					allCountries={tags.countries}
+					allMeats={tags.meats}
+					allTastes={tags.tastes}
+					resultCount={filteredRecipes.length}
+				/>					{/* Recipe Cards Grid */}
 					{filteredRecipes.length > 0 ? (
 						<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
 							{filteredRecipes.map((recipe) => (
