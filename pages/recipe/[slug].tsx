@@ -58,46 +58,28 @@ const RecipeDetail = () => {
 					<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'></div>
 				</div>
 
-				{/* Header with Favorite Button */}
-				<div className='flex items-start justify-between gap-4 mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
-					<div className='flex-1'>
-						<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
-							{recipe.name}
-						</h1>
-						<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4'>
-							{recipe.description}
-						</p>
-						
-						{/* Quick Info Badges */}
-						<div className='flex flex-wrap gap-2'>
-							<span className='inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-200 rounded-full text-sm font-bold'>
-								🍽️ {recipe.tags.meal}
-							</span>
-							<span className='inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 rounded-full text-sm font-bold'>
-								🥩 {recipe.tags.meat !== 'None' ? recipe.tags.meat : 'Vegetarian'}
-							</span>
-							<span className='inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 rounded-full text-sm font-bold'>
-								🌍 {recipe.tags.country}
-							</span>
-						</div>
-					</div>
-
-					{/* Favorite Button */}
-					<button
-						onClick={() => toggleFavorite(recipe.slug)}
-						className={`p-4 rounded-xl transition-all transform hover:scale-110 ${
-							isFav
-								? 'bg-red-500/10 text-red-600 dark:text-red-400'
-								: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-red-500'
-						}`}
-					>
-						<svg className='w-8 h-8' fill='currentColor' viewBox='0 0 24 24'>
-							<path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' />
-						</svg>
-					</button>
+			{/* Header */}
+			<div className='mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
+				<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
+					{recipe.name}
+				</h1>
+				<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4'>
+					{recipe.description}
+				</p>
+				
+				{/* Quick Info Badges */}
+				<div className='flex flex-wrap gap-2'>
+					<span className='inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-200 rounded-full text-sm font-bold'>
+						🍽️ {recipe.tags.meal}
+					</span>
+					<span className='inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 rounded-full text-sm font-bold'>
+						🥩 {recipe.tags.meat !== 'None' ? recipe.tags.meat : 'Vegetarian'}
+					</span>
+					<span className='inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 rounded-full text-sm font-bold'>
+						🌍 {recipe.tags.country}
+					</span>
 				</div>
-
-				{/* Recipe Info Grid */}
+			</div>				{/* Recipe Info Grid */}
 				<div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 p-6 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl border border-orange-200 dark:border-orange-900'>
 					<div>
 						<div className='text-sm font-semibold text-zinc-600 dark:text-zinc-400'>

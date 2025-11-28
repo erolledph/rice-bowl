@@ -74,15 +74,15 @@ const links = [
 		href: '/recipes',
 		icon: (
 			<svg
-				viewBox='0 0 15 15'
+				viewBox='0 0 24 24'
 				fill='none'
 				xmlns='http://www.w3.org/2000/svg'
 				width='18'
 				height='18'
 			>
 				<path
-					d='M7.5 15V7m0 .5v3m0-3a4 4 0 00-4-4h-3v3a4 4 0 004 4h3m0-3h3a4 4 0 004-4v-3h-3a4 4 0 00-4 4v3zm0 0l4-4m-4 7l-4-4'
-					stroke='currentColor'
+					d='M8 2C6.9 2 6 2.9 6 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-6h-2v6H8V4h12v6h2V4c0-1.1-.9-2-2-2H8zm10 8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'
+					fill='currentColor'
 				/>
 			</svg>
 		),
