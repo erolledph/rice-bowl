@@ -1,6 +1,6 @@
 ---
 title: Beef Tacos
-description: Delicious Mexican street tacos with seasoned beef and fresh toppings
+description: Delicious Mexican street tacos with seasoned beef and fresh toppings .
 servings: 4
 prepTime: 10
 cookTime: 15
@@ -15,7 +15,7 @@ ingredients_tags: beef, tortilla, tomato
 
 # Beef Tacos
 
-Authentic Mexican tacos with seasoned ground beef and vibrant toppings.
+Delicious Mexican street tacos with seasoned beef and fresh toppings .
 
 ## Ingredients
 
@@ -40,4 +40,3 @@ Authentic Mexican tacos with seasoned ground beef and vibrant toppings.
 5. Fill each with beef mixture
 6. Top with lettuce, tomatoes, cheese, and sour cream
 7. Serve with salsa and lime wedges
-
