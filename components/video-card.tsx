@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Maximize2 } from 'lucide-react'
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
-import { useHideYouTubeUI } from '@/hooks/useHideYouTubeUI'
 
 interface CookingVideo {
 	videoId: string
@@ -28,9 +27,6 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 	const { playingVideoId, setPlayingVideoId } = useVideoPlayer()
 	const isPlaying = playingVideoId === video.videoId
 	const playerRef = useRef<any>(null)
-
-	// Use hook to hide YouTube UI
-	useHideYouTubeUI(video.videoId)
 
 	useEffect(() => {
 		// Load YouTube IFrame API
