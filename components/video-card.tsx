@@ -3,118 +3,117 @@ import { Maximize2 } from 'lucide-react'
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
 
 interface CookingVideo {
-	videoId: string
-	title: string
-	thumbnailUrl: string
-	description: string
-	channelTitle: string
-	publishedAt: string
+  videoId: string
+  title: string
+  thumbnailUrl: string
+  description: string
+  channelTitle: string
+  publishedAt: string
 }
 
 interface VideoCardProps {
-	video: CookingVideo
-	onClick: (video: CookingVideo) => void
+  video: CookingVideo
+  onClick: (video: CookingVideo) => void
 }
 
-export default function VideoCard({ video, onClick }: VideoCardProps) {
-	const { playingVideoId, setPlayingVideoId } = useVideoPlayer()
-	const isPlaying = playingVideoId === video.videoId
+export default function VideoCard({ video }: VideoCardProps) {
+  const { playingVideoId, setPlayingVideoId } = useVideoPlayer()
+  const isPlaying = playingVideoId === video.videoId
 
-	const handleClick = () => {
-		setPlayingVideoId(video.videoId)
-	}
+  const handlePlay = () => setPlayingVideoId(video.videoId)
+  const handleStop = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setPlayingVideoId(null)
+  }
 
-	const handleStop = () => {
-		setPlayingVideoId(null)
-	}
+  const handleFullscreen = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const iframe = document.querySelector(
+      `[data-videoid="${video.videoId}"]`
+    ) as HTMLIFrameElement
 
-	const handleFullscreen = (e: React.MouseEvent) => {
-		e.stopPropagation()
-		const container = document.querySelector('.youtube-container-hidden-details') as HTMLElement
-		if (container) {
-			if (document.fullscreenElement) {
-				document.exitFullscreen()
-			} else {
-				container.requestFullscreen().catch(err => {
-					console.error(`Error attempting to enable fullscreen: ${err.message}`)
-				})
-			}
-		}
-	}
+    if (!iframe) return
 
-	return (
-		<div className='rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group'>
-			{/* Video Container */}
-			<div className='relative w-full h-48 overflow-hidden bg-zinc-200 dark:bg-zinc-700'>
-				{!isPlaying ? (
-					<>
-						{/* Thumbnail */}
-						<img
-							src={video.thumbnailUrl}
-							alt={video.title}
-							className='w-full h-full object-cover group-hover:scale-110 transition-transform duration-300'
-						/>
+    // Use YouTube's native fullscreen (works perfectly)
+    if (iframe.requestFullscreen) {
+      iframe.requestFullscreen()
+      // @ts-ignore - Safari uses webkit prefix
+    } else if (iframe.webkitRequestFullscreen) {
+      iframe.webkitRequestFullscreen()
+      // @ts-ignore
+    } else if (iframe.msRequestFullscreen) {
+      iframe.msRequestFullscreen()
+    }
+  }
 
-						{/* Play Button Overlay */}
-						<div
-							onClick={handleClick}
-							className='absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors cursor-pointer'
-						>
-							<div className='w-14 h-14 rounded-full bg-red-600 flex items-center justify-center group-hover:scale-110 transition-transform'>
-								<svg
-									className='w-6 h-6 text-white fill-white'
-									viewBox='0 0 24 24'
-									xmlns='http://www.w3.org/2000/svg'
-								>
-									<path d='M8 5v14l11-7z' />
-								</svg>
-							</div>
-						</div>
-					</>
-				) : (
-					<div className='relative w-full h-full'>
-						<div className='youtube-container-hidden-details'>
-							<iframe
-								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&color=white&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1`}
-								title={video.title}
-								frameBorder='0'
-								allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-								allowFullScreen
-							/>
-						</div>
+  return (
+    <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
+      {/* Video / Thumbnail Container */}
+      <div className="relative w-full bg-black">
+        {!isPlaying ? (
+          <>
+            {/* Thumbnail */}
+            <img
+              src={video.thumbnailUrl}
+              alt={video.title}
+              className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
+            />
 
-						{/* Control Buttons */}
-						<div className='absolute top-2 right-2 flex gap-2'>
-							{/* Fullscreen Button */}
-							<button
-								onClick={handleFullscreen}
-								title='Open in YouTube'
-								className='p-2 bg-zinc-900/80 hover:bg-zinc-900 text-white rounded-lg transition-colors backdrop-blur-sm'
-							>
-								<Maximize2 className='w-4 h-4' />
-							</button>
+            {/* Play Overlay */}
+            <div
+              onClick={handlePlay}
+              className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors"
+            >
+              <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
+                <svg className="w-8 h-8 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* ──────── CLEAN YOUTUBE PLAYER (NO TITLE BAR) ──────── */
+          <div className="youtube-clean" data-videoid={video.videoId}>
+            <iframe
+              data-videoid={video.videoId}
+              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1&cc_load_policy=0&iv_load_policy=3`}
+              title={video.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        )}
+      </div>
 
-							{/* Stop Button */}
-							<button
-								onClick={(e) => {
-									e.stopPropagation()
-									handleStop()
-								}}
-								className='bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors'
-							>
-								Stop
-							</button>
-						</div>
-					</div>
-				)}
-			</div>
+      {/* Card Content */}
+      <div className="p-4">
+        <h3 className="font-bold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+          {video.title}
+        </h3>
+      </div>
 
-			{/* Content - Only Title */}
-			<div className='p-4'>
-				<h3 className='font-bold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors'>
-					{video.title}
-				</h3>
-			</div>
-		</div>
-	)
+      {/* Floating Controls when playing */}
+      {isPlaying && (
+        <div className="absolute top-3 right-3 flex gap-2 z-10">
+          {/* Fullscreen Button */}
+          <button
+            onClick={handleFullscreen}
+            className="p-2.5 bg-black/70 hover:bg-black/90 text-white rounded-lg backdrop-blur-sm transition-all"
+            title="Fullscreen"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+
+          {/* Stop Button */}
+          <button
+            onClick={handleStop}
+            className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all"
+          >
+            Stop
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
