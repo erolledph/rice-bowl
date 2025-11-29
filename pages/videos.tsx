@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Play } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Play, Search } from 'lucide-react'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import VideoCard from '@/components/video-card'
@@ -19,6 +19,7 @@ const VideosPage = () => {
 	const [videos, setVideos] = useState<CookingVideo[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedVideo, setSelectedVideo] = useState<CookingVideo | null>(null)
 	const [playerOpen, setPlayerOpen] = useState(false)
 
@@ -55,6 +56,19 @@ const VideosPage = () => {
 		fetchVideos()
 	}, [])
 
+	// Filter videos based on search query
+	const filteredVideos = useMemo(() => {
+		if (!searchQuery.trim()) return videos
+
+		const query = searchQuery.toLowerCase()
+		return videos.filter(
+			(video) =>
+				video.title.toLowerCase().includes(query) ||
+				video.description.toLowerCase().includes(query) ||
+				video.channelTitle.toLowerCase().includes(query)
+		)
+	}, [videos, searchQuery])
+
 	const handleVideoClick = (video: CookingVideo) => {
 		setSelectedVideo(video)
 		setPlayerOpen(true)
@@ -77,6 +91,30 @@ const VideosPage = () => {
 					<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-8'>
 						Discover amazing cooking tutorials and recipes from professional chefs
 					</p>
+
+					{/* Search Bar */}
+					<div className='flex gap-3 items-end mb-8'>
+						<div className='flex-1'>
+							<input
+								type='text'
+								placeholder='Search cooking videos...'
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className='w-full px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 transition-all'
+							/>
+						</div>
+						<button className='px-4 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2'>
+							<Search size={20} />
+							<span className='hidden sm:inline'>Search</span>
+						</button>
+					</div>
+
+					{/* Results Count */}
+					{!loading && videos.length > 0 && (
+						<p className='text-sm text-zinc-600 dark:text-zinc-400 mb-6'>
+							Found <span className='font-semibold text-orange-600 dark:text-orange-400'>{filteredVideos.length}</span> video{filteredVideos.length !== 1 ? 's' : ''} {searchQuery && `matching "${searchQuery}"`}
+						</p>
+					)}
 				</div>
 
 				{/* Loading State - Show Skeleton */}
@@ -102,15 +140,34 @@ const VideosPage = () => {
 				)}
 
 				{/* Success State - Show Videos Grid */}
-				{!loading && videos.length > 0 && (
+				{!loading && videos.length > 0 && filteredVideos.length > 0 && (
 					<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24'>
-						{videos.map((video) => (
+						{filteredVideos.map((video) => (
 							<VideoCard
 								key={video.videoId}
 								video={video}
 								onClick={handleVideoClick}
 							/>
 						))}
+					</div>
+				)}
+
+				{/* No Results for Search */}
+				{!loading && videos.length > 0 && filteredVideos.length === 0 && searchQuery && (
+					<div className='mt-12 text-center py-16'>
+						<Search className='w-16 h-16 text-zinc-400 dark:text-zinc-600 mx-auto mb-4' />
+						<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-2'>
+							No videos found
+						</p>
+						<p className='text-zinc-500 dark:text-zinc-500 mb-6'>
+							Try adjusting your search keywords
+						</p>
+						<button
+							onClick={() => setSearchQuery('')}
+							className='px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold text-sm transition-colors'
+						>
+							Clear Search
+						</button>
 					</div>
 				)}
 
