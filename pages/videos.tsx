@@ -16,16 +16,19 @@ interface CookingVideo {
 }
 
 const VideosPage = () => {
-	const [videos, setVideos] = useState<CookingVideo[]>([])
+	const [allVideos, setAllVideos] = useState<CookingVideo[]>([]) // All videos from API
+	const [displayedVideos, setDisplayedVideos] = useState<CookingVideo[]>([]) // Videos currently displayed (pagination)
 	const [loading, setLoading] = useState(true)
 	const [loadingMore, setLoadingMore] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedVideo, setSelectedVideo] = useState<CookingVideo | null>(null)
 	const [playerOpen, setPlayerOpen] = useState(false)
+	const [page, setPage] = useState(1)
 	const observerTarget = useRef<HTMLDivElement>(null)
+	const VIDEOS_PER_PAGE = 12
 
-	// Fetch initial videos
+	// Fetch initial videos from API
 	useEffect(() => {
 		const fetchVideos = async () => {
 			try {
@@ -41,9 +44,10 @@ const VideosPage = () => {
 				const data = await response.json()
 
 				if (data.status === 'success' && data.videos) {
-					// Duplicate videos to simulate more content for infinite scroll
-					const allVideos = [...data.videos, ...data.videos, ...data.videos]
-					setVideos(allVideos)
+					setAllVideos(data.videos)
+					// Show first page of videos
+					setDisplayedVideos(data.videos.slice(0, VIDEOS_PER_PAGE))
+					setPage(1)
 				} else if (data.status === 'error' && data.message) {
 					console.warn('Videos API message:', data.message)
 					setError(data.message)
@@ -59,18 +63,45 @@ const VideosPage = () => {
 		fetchVideos()
 	}, [])
 
-	// Infinite scroll observer
+	// Filter videos based on search query - real-time like YouTube
+	const filteredVideos = useMemo(() => {
+		if (!searchQuery.trim()) return allVideos
+
+		const query = searchQuery.toLowerCase()
+		return allVideos.filter(
+			(video) =>
+				video.title.toLowerCase().includes(query) ||
+				video.description.toLowerCase().includes(query) ||
+				video.channelTitle.toLowerCase().includes(query)
+		)
+	}, [allVideos, searchQuery])
+
+	// When search changes, reset pagination and show new filtered results
+	useEffect(() => {
+		const newDisplayed = filteredVideos.slice(0, VIDEOS_PER_PAGE)
+		setDisplayedVideos(newDisplayed)
+		setPage(1)
+	}, [filteredVideos])
+
+	// Infinite scroll observer - load more videos when user scrolls to bottom
 	useEffect(() => {
 		const observer = new IntersectionObserver(
 			(entries) => {
-				if (entries[0].isIntersecting && !loading && !loadingMore && videos.length > 0) {
-					// Load more videos
-					setLoadingMore(true)
-					setTimeout(() => {
-						// Simulate loading more videos by duplicating existing ones
-						setVideos((prev) => [...prev, ...prev.slice(0, 12)])
-						setLoadingMore(false)
-					}, 500)
+				if (entries[0].isIntersecting && !loading && !loadingMore && filteredVideos.length > 0) {
+					// Load next page of videos
+					const nextPage = page + 1
+					const startIdx = (nextPage - 1) * VIDEOS_PER_PAGE
+					const endIdx = startIdx + VIDEOS_PER_PAGE
+
+					if (startIdx < filteredVideos.length) {
+						setLoadingMore(true)
+						// Simulate network delay
+						setTimeout(() => {
+							setDisplayedVideos((prev) => [...prev, ...filteredVideos.slice(startIdx, endIdx)])
+							setPage(nextPage)
+							setLoadingMore(false)
+						}, 300)
+					}
 				}
 			},
 			{ threshold: 0.1 }
@@ -81,20 +112,7 @@ const VideosPage = () => {
 		}
 
 		return () => observer.disconnect()
-	}, [loading, loadingMore, videos.length])
-
-	// Filter videos based on search query - real-time like YouTube
-	const filteredVideos = useMemo(() => {
-		if (!searchQuery.trim()) return videos
-
-		const query = searchQuery.toLowerCase()
-		return videos.filter(
-			(video) =>
-				video.title.toLowerCase().includes(query) ||
-				video.description.toLowerCase().includes(query) ||
-				video.channelTitle.toLowerCase().includes(query)
-		)
-	}, [videos, searchQuery])
+	}, [page, loading, loadingMore, filteredVideos])
 
 	const handleVideoClick = (video: CookingVideo) => {
 		setSelectedVideo(video)
@@ -110,7 +128,8 @@ const VideosPage = () => {
 	const handleRefresh = () => {
 		setLoading(true)
 		setError(null)
-		setVideos([])
+		setAllVideos([])
+		setDisplayedVideos([])
 		window.location.reload()
 	}
 
@@ -151,8 +170,8 @@ const VideosPage = () => {
 					</div>
 				)}
 
-				{/* Error State - Graceful Display */}
-				{error && !loading && videos.length === 0 && (
+				// Error State - Graceful Display
+				{error && !loading && allVideos.length === 0 && (
 					<div className='mt-12 text-center py-16'>
 						<div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 mb-4'>
 							<Play className='w-8 h-8 text-orange-600 dark:text-orange-400' />
@@ -172,13 +191,13 @@ const VideosPage = () => {
 					</div>
 				)}
 
-				{/* Success State - Show Videos Grid */}
-				{!loading && videos.length > 0 && filteredVideos.length > 0 && (
+				{/* Success State - Show Videos Grid with Infinite Scroll */}
+				{!loading && allVideos.length > 0 && displayedVideos.length > 0 && (
 					<>
 						<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24'>
-							{filteredVideos.map((video) => (
+							{displayedVideos.map((video) => (
 								<VideoCard
-									key={video.videoId}
+									key={`${video.videoId}-${Math.random()}`}
 									video={video}
 									onClick={handleVideoClick}
 								/>
@@ -201,7 +220,7 @@ const VideosPage = () => {
 				)}
 
 				{/* No Results for Search */}
-				{!loading && videos.length > 0 && filteredVideos.length === 0 && searchQuery && (
+				{!loading && allVideos.length > 0 && displayedVideos.length === 0 && searchQuery && (
 					<div className='mt-12 text-center py-16'>
 						<Search className='w-16 h-16 text-zinc-400 dark:text-zinc-600 mx-auto mb-4' />
 						<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-2'>
@@ -220,7 +239,7 @@ const VideosPage = () => {
 				)}
 
 				{/* No Videos - With Error */}
-				{!loading && !error && videos.length === 0 && (
+				{!loading && !error && allVideos.length === 0 && (
 					<div className='mt-12 text-center py-16'>
 						<Play className='w-16 h-16 text-zinc-400 dark:text-zinc-600 mx-auto mb-4' />
 						<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-2'>
