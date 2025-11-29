@@ -10,12 +10,12 @@ mealType: Dinner
 protein: Chicken
 country: India
 tastes: creamy, savory, mild
-ingredients_tags: chicken, butter, tomato
+ingredients_tags: chicken, butter, tomato, butter
 ---
 
 # Butter Chicken
 
-Delicious Indian chicken curry with a rich and creamy tomato sauce.
+Tender chicken in a rich, creamy tomato butter sauce
 
 ## Ingredients
 
@@ -43,4 +43,3 @@ Delicious Indian chicken curry with a rich and creamy tomato sauce.
 7. Simmer for 10 more minutes until chicken is tender
 8. Garnish with cilantro
 9. Serve with rice or naan
-
