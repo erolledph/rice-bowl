@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, Tags } from 'lucide-react'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import RecipeCard from '@/components/recipe-card'
@@ -19,7 +18,7 @@ const SearchPage = () => {
 	const [meatFilters, setMeatFilters] = useState<string[]>([])
 	const [tasteFilters, setTasteFilters] = useState<string[]>([])
 
-	const { getFilteredRecipes, toggleFavorite, isFavorite, getAllTags, loading, getMatchingKeywords } = useRecipes()
+	const { getFilteredRecipes, toggleFavorite, isFavorite, getAllTags, loading } = useRecipes()
 
 	const tags = getAllTags()
 	const allResults = getFilteredRecipes(searchQuery)
@@ -107,54 +106,16 @@ const SearchPage = () => {
 				{loading ? (
 					<RecipeCardsSkeleton count={8} />
 				) : results.length > 0 ? (
-					<>
-						{searchQuery && (
-							<div className='mb-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-zinc-800 dark:to-zinc-800 rounded-lg border border-orange-200 dark:border-zinc-700'>
-								<div className='flex items-start gap-3'>
-									<Tags className='w-5 h-5 text-orange-500 dark:text-orange-400 mt-1 flex-shrink-0' />
-									<div>
-										<p className='font-semibold text-zinc-900 dark:text-zinc-50 mb-2'>
-											Found {results.length} recipe{results.length !== 1 ? 's' : ''} matching &quot;{searchQuery}&quot;
-										</p>
-										<p className='text-sm text-zinc-600 dark:text-zinc-400'>
-											Results are shown for matching ingredients, cuisines, tastes, and other keywords
-										</p>
-									</div>
-								</div>
-							</div>
-						)}
-						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-							{results.map((recipe) => {
-								const matchingKeywords = getMatchingKeywords(recipe, searchQuery)
-								return (
-									<div key={recipe.slug}>
-										<RecipeCard
-											recipe={recipe}
-											isFavorite={isFavorite(recipe.slug)}
-											onToggleFavorite={toggleFavorite}
-										/>
-										{matchingKeywords && matchingKeywords.length > 0 && (
-											<div className='mt-2 px-3 py-2 bg-orange-50 dark:bg-zinc-800 rounded text-xs'>
-												<p className='text-zinc-600 dark:text-zinc-400 font-medium mb-1'>Matched keywords:</p>
-												<div className='flex flex-wrap gap-1'>
-													{matchingKeywords.slice(0, 4).map((keyword, idx) => (
-														<span key={idx} className='px-2 py-1 bg-orange-200 dark:bg-orange-900 text-orange-900 dark:text-orange-100 rounded'>
-															{keyword}
-														</span>
-													))}
-													{matchingKeywords.length > 4 && (
-														<span className='px-2 py-1 text-zinc-600 dark:text-zinc-400'>
-															+{matchingKeywords.length - 4} more
-														</span>
-													)}
-												</div>
-											</div>
-										)}
-									</div>
-								)
-							})}
-						</div>
-					</>
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+						{results.map((recipe) => (
+							<RecipeCard
+								key={recipe.slug}
+								recipe={recipe}
+								isFavorite={isFavorite(recipe.slug)}
+								onToggleFavorite={toggleFavorite}
+							/>
+						))}
+					</div>
 				) : (
 					<div className='text-center py-20'>
 						<div className='text-6xl mb-4'>🍳</div>
