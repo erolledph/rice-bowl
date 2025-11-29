@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app'
 import { useEffect, useState } from 'react'
 import { ThemeProvider } from 'next-themes'
 import { AdminProvider } from '@/contexts/AdminContext'
+import { VideoPlayerProvider } from '@/contexts/VideoPlayerContext'
 import { PWAInstallModal } from '@/components/pwa-install-modal'
 import '@/styles/globals.css'
 
@@ -48,15 +49,17 @@ export default function App({ Component, pageProps }: AppProps) {
 			disableTransitionOnChange
 		>
 			<AdminProvider>
-				<PWAInstallModal
-					deferredPrompt={showModal ? deferredPrompt : null}
-					onInstall={() => {
-						setDeferredPrompt(null)
-						setShowModal(false)
-					}}
-					onDismiss={() => setShowModal(false)}
-				/>
-				<Component {...pageProps} />
+				<VideoPlayerProvider>
+					<PWAInstallModal
+						deferredPrompt={showModal ? deferredPrompt : null}
+						onInstall={() => {
+							setDeferredPrompt(null)
+							setShowModal(false)
+						}}
+						onDismiss={() => setShowModal(false)}
+					/>
+					<Component {...pageProps} />
+				</VideoPlayerProvider>
 			</AdminProvider>
 		</ThemeProvider>
 	)

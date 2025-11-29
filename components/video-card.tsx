@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
 
 interface CookingVideo {
 	videoId: string
@@ -15,10 +16,15 @@ interface VideoCardProps {
 }
 
 export default function VideoCard({ video, onClick }: VideoCardProps) {
-	const [isPlaying, setIsPlaying] = useState(false)
+	const { playingVideoId, setPlayingVideoId } = useVideoPlayer()
+	const isPlaying = playingVideoId === video.videoId
 
 	const handleClick = () => {
-		setIsPlaying(true)
+		setPlayingVideoId(video.videoId)
+	}
+
+	const handleStop = () => {
+		setPlayingVideoId(null)
 	}
 
 	return (
@@ -51,16 +57,28 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 						</div>
 					</>
 				) : (
-					<iframe
-						width='100%'
-						height='100%'
-						src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
-						title={video.title}
-						frameBorder='0'
-						allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-						allowFullScreen
-						className='w-full h-full'
-					/>
+					<div className='relative w-full h-full'>
+						<iframe
+							width='100%'
+							height='100%'
+							src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
+							title={video.title}
+							frameBorder='0'
+							allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+							allowFullScreen
+							className='w-full h-full'
+						/>
+						{/* Stop Button */}
+						<button
+							onClick={(e) => {
+								e.stopPropagation()
+								handleStop()
+							}}
+							className='absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-semibold transition-colors'
+						>
+							Stop
+						</button>
+					</div>
 				)}
 			</div>
 
