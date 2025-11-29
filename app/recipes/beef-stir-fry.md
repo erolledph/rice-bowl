@@ -5,7 +5,7 @@ servings: 3
 prepTime: 15
 cookTime: 12
 difficulty: Easy
-image: https://images.pexels.com/photos/3000530/pexels-photo-3000530.jpeg
+image: https://images.pexels.com/photos/28503598/pexels-photo-28503598.jpeg
 mealType: Dinner
 protein: Beef
 country: China
@@ -15,7 +15,7 @@ ingredients_tags: beef, vegetable, soy
 
 # Beef Stir Fry
 
-Quick and delicious stir-fried beef with colorful vegetables.
+Tender beef with vegetables in a savory soy-ginger sauce
 
 ## Ingredients
 
@@ -43,4 +43,3 @@ Quick and delicious stir-fried beef with colorful vegetables.
 8. Toss until coated and thickened (1-2 minutes)
 9. Garnish with green onions and sesame seeds
 10. Serve with rice
-
