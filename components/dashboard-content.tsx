@@ -207,24 +207,24 @@ export const DashboardContent = () => {
 			ingredients: '',
 			instructions: '',
 			tastes: '',
-			ingredients_tags: '',
-		})
-		setEditingSlug(null)
-	} catch (error) {
-		setMessage('Error creating recipe: ' + (error instanceof Error ? error.message : 'Unknown error'))
-		setMessageType('error')
+		ingredients_tags: '',
+	})
+	setEditingSlug(null)
+} catch (error) {
+	setMessage('Error creating recipe: ' + (error instanceof Error ? error.message : 'Unknown error'))
+	setMessageType('error')
+}
+
+setLoading(false)
+}
+
+const handleDeleteRecipe = async (slug: string) => {
+	if (!confirm(`Are you sure you want to delete this recipe? This action cannot be undone.`)) {
+		return
 	}
 
-	setLoading(false)
-}	const handleDeleteRecipe = async (slug: string) => {
-		if (!confirm(`Are you sure you want to delete this recipe? This action cannot be undone.`)) {
-			return
-		}
-
-		setDeletingSlug(slug)
-		setMessage('')
-
-		try {
+	setDeletingSlug(slug)
+	setMessage('')		try {
 			if (gitHubOwner && gitHubRepo && gitHubToken) {
 				await deleteRecipePost(slug, gitHubOwner, gitHubRepo, gitHubToken)
 				setMessage(`✅ Recipe deleted from GitHub`)
@@ -287,22 +287,24 @@ export const DashboardContent = () => {
 				</button>
 				<button
 					onClick={() => setActiveTab('create')}
-					className={`px-6 py-3 font-bold rounded-lg transition-all ${
-						activeTab === 'create'
-							? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-							: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
-					}`}
-				>
-					✨ {editingSlug ? 'Edit Recipe' : 'Create Recipe'}
-				</button>
-			</div>				<div className='mb-8'>
+				className={`px-6 py-3 font-bold rounded-lg transition-all ${
+					activeTab === 'create'
+						? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+						: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
+				}`}
+			>
+				✨ {editingSlug ? 'Edit Recipe' : 'Create Recipe'}
+			</button>
+		</div>
 
-				{/* Recipes List Tab */}
-				{activeTab === 'recipes' && (
-					<div>
-						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-6'>Recipes</h2>
+		<div className='mb-8'>
 
-						{message && (
+			{/* Recipes List Tab */}
+			{activeTab === 'recipes' && (
+				<div>
+					<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-6'>Recipes</h2>
+
+					{message && (
 							<div
 								className={`p-4 rounded-lg mb-6 ${
 									messageType === 'success'
@@ -335,22 +337,24 @@ export const DashboardContent = () => {
 												{/* Image */}
 							<td className='px-6 py-4'>
 								<div className='h-16 w-16 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-700 flex-shrink-0 relative'>
-									<Image
-										src={recipe.image}
-										alt={recipe.name}
-										fill
-										className='object-cover'
-									/>
-								</div>
-							</td>												{/* Title */}
-												<td className='px-6 py-4'>
-													<div className='font-semibold text-zinc-900 dark:text-white'>{recipe.name}</div>
-													<div className='text-sm text-zinc-600 dark:text-zinc-400'>{recipe.description}</div>
-												</td>
+								<Image
+									src={recipe.image}
+									alt={recipe.name}
+									fill
+									className='object-cover'
+								/>
+							</div>
+						</td>
 
-												{/* Slug */}
-												<td className='px-6 py-4'>
-													<code className='text-xs bg-zinc-200 dark:bg-zinc-700 px-2 py-1 rounded text-zinc-900 dark:text-white'>
+						{/* Title */}
+						<td className='px-6 py-4'>
+							<div className='font-semibold text-zinc-900 dark:text-white'>{recipe.name}</div>
+							<div className='text-sm text-zinc-600 dark:text-zinc-400'>{recipe.description}</div>
+						</td>
+
+						{/* Slug */}
+						<td className='px-6 py-4'>
+							<code className='text-xs bg-zinc-200 dark:bg-zinc-700 px-2 py-1 rounded text-zinc-900 dark:text-white'>
 														/{recipe.slug}
 													</code>
 												</td>
@@ -411,24 +415,26 @@ export const DashboardContent = () => {
 														className='p-2 rounded-lg bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors'
 													>
 														<Edit className='w-5 h-5' />
-													</button>														{/* Delete */}
-														<button
-															onClick={() => handleDeleteRecipe(recipe.slug)}
-															disabled={deletingSlug === recipe.slug}
-															title='Delete recipe'
-															className='p-2 rounded-lg bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-														>
-															{deletingSlug === recipe.slug ? (
-																<Loader className='w-5 h-5 animate-spin' />
-															) : (
-																<Trash2 className='w-5 h-5' />
-															)}
-														</button>
-													</div>
-												</td>
-											</tr>
-										))}
-									</tbody>
+												</button>
+
+												{/* Delete */}
+												<button
+													onClick={() => handleDeleteRecipe(recipe.slug)}
+													disabled={deletingSlug === recipe.slug}
+													title='Delete recipe'
+													className='p-2 rounded-lg bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+												>
+													{deletingSlug === recipe.slug ? (
+														<Loader className='w-5 h-5 animate-spin' />
+													) : (
+														<Trash2 className='w-5 h-5' />
+													)}
+												</button>
+											</div>
+										</td>
+									</tr>
+								))}
+								</tbody>
 								</table>
 							</div>
 						) : (
@@ -437,8 +443,10 @@ export const DashboardContent = () => {
 							</div>
 						)}
 					</div>
-				)}					{/* Create Recipe Tab */}
-					{activeTab === 'create' && (
+				)}
+
+				{/* Create Recipe Tab */}
+				{activeTab === 'create' && (
 						<div>
 							<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-6'>Create New Recipe</h2>
 
