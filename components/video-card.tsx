@@ -22,7 +22,6 @@ export default function VideoCard({ video }: VideoCardProps) {
   const isPlaying = playingVideoId === video.videoId
 
   const handlePlay = () => setPlayingVideoId(video.videoId)
-
   const handleStop = (e: React.MouseEvent) => {
     e.stopPropagation()
     setPlayingVideoId(null)
@@ -38,11 +37,8 @@ export default function VideoCard({ video }: VideoCardProps) {
 
     const requestFs =
       iframe.requestFullscreen ||
-      // Safari iOS/macOS
       (iframe as any).webkitRequestFullscreen ||
-      // Old Firefox
       (iframe as any).mozRequestFullScreen ||
-      // Old IE/Edge
       (iframe as any).msRequestFullscreen
 
     requestFs?.call(iframe)
@@ -50,7 +46,6 @@ export default function VideoCard({ video }: VideoCardProps) {
 
   return (
     <div className="group relative rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow">
-      {/* Thumbnail or Player */}
       <div className="relative w-full bg-black">
         {!isPlaying ? (
           <>
@@ -60,11 +55,9 @@ export default function VideoCard({ video }: VideoCardProps) {
               width={480}
               height={270}
               className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
-              unoptimized // YouTube thumbnails are already compressed
-              priority={false}
+              unoptimized
             />
 
-            {/* Big Play Button Overlay */}
             <button
               onClick={handlePlay}
               className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors"
@@ -78,7 +71,6 @@ export default function VideoCard({ video }: VideoCardProps) {
             </button>
           </>
         ) : (
-          /* CLEAN YOUTUBE PLAYER – NO TITLE BAR EVER */
           <div className="youtube-clean">
             <iframe
               data-videoid={video.videoId}
@@ -92,14 +84,12 @@ export default function VideoCard({ video }: VideoCardProps) {
         )}
       </div>
 
-      {/* Title below */}
       <div className="p-4">
         <h3 className="font-bold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
           {video.title}
         </h3>
       </div>
 
-      {/* Floating controls when playing */}
       {isPlaying && (
         <div className="absolute top-3 right-3 flex gap-2 z-10">
           <button
