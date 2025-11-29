@@ -170,7 +170,7 @@ const VideosPage = () => {
 					</div>
 				)}
 
-				// Error State - Graceful Display
+				{/* Error State - Graceful Display */}
 				{error && !loading && allVideos.length === 0 && (
 					<div className='mt-12 text-center py-16'>
 						<div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 mb-4'>
