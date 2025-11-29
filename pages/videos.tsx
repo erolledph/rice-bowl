@@ -65,24 +65,25 @@ const VideosPage = () => {
 
 				const data: SearchResult = await response.json()
 
-				if (data.status === 'success' && data.videos) {
-					if (!pageToken) {
-						// New search
-						setAllVideos(data.videos)
-						setDisplayedVideos(data.videos.slice(0, VIDEOS_PER_PAGE))
-						setPage(1)
-					} else {
-						// Load more - append to existing videos
-						setAllVideos((prev) => [...prev, ...data.videos])
-						// Update displayed videos - add next batch
-						setDisplayedVideos((prev) => [...prev, ...data.videos.slice(0, VIDEOS_PER_PAGE)])
-						setPage((prev) => prev + 1)
-					}
-
-					setNextPageToken(data.nextPageToken || null)
+			if (data.status === 'success' && data.videos && data.videos.length > 0) {
+				if (!pageToken) {
+					// New search
+					setAllVideos(data.videos)
+					setDisplayedVideos(data.videos.slice(0, VIDEOS_PER_PAGE))
+					setPage(1)
 				} else {
-					setError(data.message || 'No videos found. Try a different search.')
+					// Load more - append to existing videos
+					const videosToAdd = data.videos || []
+					setAllVideos((prev) => [...prev, ...videosToAdd])
+					// Update displayed videos - add next batch
+					setDisplayedVideos((prev) => [...prev, ...videosToAdd.slice(0, VIDEOS_PER_PAGE)])
+					setPage((prev) => prev + 1)
 				}
+
+				setNextPageToken(data.nextPageToken || null)
+			} else {
+				setError(data.message || 'No videos found. Try a different search.')
+			}
 			} catch (err: any) {
 				console.error('Error fetching videos:', err)
 				setError('Unable to load videos. Please try again.')
