@@ -36,6 +36,15 @@ export default function VideoPlayer({ video, isOpen, onClose }: VideoPlayerProps
 		}
 	}, [isOpen, onClose])
 
+	// Load YouTube IFrame API
+	useEffect(() => {
+		if (!window.YT) {
+			const script = document.createElement('script')
+			script.src = 'https://www.youtube.com/iframe_api'
+			document.body.appendChild(script)
+		}
+	}, [])
+
 	if (!isOpen || !video) return null
 
 	return (
@@ -56,15 +65,16 @@ export default function VideoPlayer({ video, isOpen, onClose }: VideoPlayerProps
 					</div>
 
 					{/* Video Player */}
-					<div className='relative w-full bg-black'>
-						<div className='relative pt-[56.25%]'>
+					<div className='relative w-full bg-black overflow-hidden' style={{ aspectRatio: '16/9' }}>
+						<div className='youtube-container-hidden-details'>
 							<iframe
-								className='absolute inset-0 w-full h-full'
-								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&modestbranding=1`}
+								id={`youtube-modal-player-${video.videoId}`}
+								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1&fs=0&iv_load_policy=3`}
 								title={video.title}
 								allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
 								allowFullScreen
 								loading='lazy'
+								style={{ pointerEvents: 'none' }}
 							></iframe>
 						</div>
 					</div>

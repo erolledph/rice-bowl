@@ -120,23 +120,61 @@ body {
 	}
 }
 
-/* YouTube Embed - Hide Channel/Title Details */
+/* YouTube Embed - Hide All YouTube UI Details */
 .youtube-container-hidden-details {
 	position: relative;
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
 	aspect-ratio: 16/9;
-	pointer-events: auto;
+	pointer-events: none;
 }
 
 .youtube-container-hidden-details iframe {
 	position: absolute;
 	top: 0;
-	left: -100%;
-	width: 300%;
+	left: 0;
+	width: 100%;
 	height: 100%;
+	border: none;
+	pointer-events: none;
 }
-.ytp-chrome-top {
-    display: none !important;
+
+/* Hide all YouTube player UI elements */
+.ytp-chrome-top,
+.ytp-chrome-bottom,
+.ytp-title,
+.ytp-title-channel,
+.ytp-title-expanded-overlay,
+.ytp-shorts-title-channel,
+.ytp-watermark,
+.ytp-impression-link,
+.ytp-cards-button,
+.ytp-info-panel-preview,
+.ytp-share-button,
+.ytp-copylink-button,
+.ytp-playlist-menu-button,
+.ytp-search-button,
+.ytp-gradient-top,
+.ytp-gradient-bottom,
+.ytp-bezel,
+.ytp-cued-thumbnail-overlay,
+.ytp-endscreen-content,
+.ytp-suggested-action,
+.ytp-info-panel-detail-skrim,
+.iv-drawer,
+.ytp-player-content,
+.ytp-paid-content-overlay,
+.ytp-upnext,
+.ytp-overflow-panel {
+	display: none !important;
+}
+
+/* Ensure controls are hidden */
+.html5-video-player .ytp-chrome-controls {
+	display: none !important;
+}
+
+.html5-video-player {
+	background-color: #000 !important;
 }
