@@ -1,4 +1,5 @@
 import React from 'react'
+import { Maximize2 } from 'lucide-react'
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
 
 interface CookingVideo {
@@ -25,6 +26,20 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 
 	const handleStop = () => {
 		setPlayingVideoId(null)
+	}
+
+	const handleFullscreen = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		const container = document.querySelector('.youtube-container-hidden-details') as HTMLElement
+		if (container) {
+			if (document.fullscreenElement) {
+				document.exitFullscreen()
+			} else {
+				container.requestFullscreen().catch(err => {
+					console.error(`Error attempting to enable fullscreen: ${err.message}`)
+				})
+			}
+		}
 	}
 
 	return (
@@ -58,26 +73,39 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 					</>
 				) : (
 					<div className='relative w-full h-full'>
-						<iframe
-							width='100%'
-							height='100%'
-							src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
-							title={video.title}
-							frameBorder='0'
-							allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-							allowFullScreen
-							className='w-full h-full'
-						/>
-						{/* Stop Button */}
-						<button
-							onClick={(e) => {
-								e.stopPropagation()
-								handleStop()
-							}}
-							className='absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-semibold transition-colors'
-						>
-							Stop
-						</button>
+						{/* YouTube Container with hidden details */}
+						<div className='youtube-container-hidden-details'>
+							<iframe
+								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&color=white&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1`}
+								title={video.title}
+								frameBorder='0'
+								allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+								allowFullScreen
+							/>
+						</div>
+
+						{/* Control Buttons */}
+						<div className='absolute top-2 right-2 flex gap-2'>
+							{/* Fullscreen Button */}
+							<button
+								onClick={handleFullscreen}
+								title='Open in YouTube'
+								className='p-2 bg-zinc-900/80 hover:bg-zinc-900 text-white rounded-lg transition-colors backdrop-blur-sm'
+							>
+								<Maximize2 className='w-4 h-4' />
+							</button>
+
+							{/* Stop Button */}
+							<button
+								onClick={(e) => {
+									e.stopPropagation()
+									handleStop()
+								}}
+								className='bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors'
+							>
+								Stop
+							</button>
+						</div>
 					</div>
 				)}
 			</div>
@@ -88,6 +116,22 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 					{video.title}
 				</h3>
 			</div>
+
+			<style jsx>{`
+				.youtube-container-hidden-details {
+					overflow: hidden;
+					width: 100%;
+					height: 100%;
+					aspect-ratio: 16/9;
+					pointer-events: auto;
+				}
+
+				.youtube-container-hidden-details iframe {
+					width: 300%;
+					height: 100%;
+					margin-left: -100%;
+				}
+			`}</style>
 		</div>
 	)
 }
