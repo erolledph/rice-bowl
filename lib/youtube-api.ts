@@ -26,11 +26,117 @@ let videoCache: VideoCache = {
 };
 
 /**
- * Fetch and cache cooking videos from YouTube API
- * Uses ETag for zero-cost update checks
+ * Mock videos for development/fallback when API key is not available
  */
+function getMockVideos(): CookingVideo[] {
+	return [
+		{
+			videoId: 'dQw4w9WgXcQ',
+			title: 'Easy Chocolate Chip Cookies Recipe',
+			thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/medium.jpg',
+			description: 'Learn how to make delicious homemade chocolate chip cookies with this easy step-by-step tutorial.',
+			channelTitle: 'Cooking Basics',
+			publishedAt: '2023-01-15T10:00:00Z',
+		},
+		{
+			videoId: 'jNQXAC9IVRw',
+			title: 'Perfect Pasta Carbonara - Italian Recipe',
+			thumbnailUrl: 'https://i.ytimg.com/vi/jNQXAC9IVRw/medium.jpg',
+			description: 'Master the classic Italian pasta carbonara with authentic technique and fresh ingredients.',
+			channelTitle: 'Italian Cooking',
+			publishedAt: '2023-02-20T14:30:00Z',
+		},
+		{
+			videoId: 'E07s5ZFNsHo',
+			title: 'Homemade Pizza Dough Tutorial',
+			thumbnailUrl: 'https://i.ytimg.com/vi/E07s5ZFNsHo/medium.jpg',
+			description: 'Step-by-step guide to making perfect pizza dough from scratch. Tips and tricks included!',
+			channelTitle: 'Pizza Master',
+			publishedAt: '2023-03-10T09:15:00Z',
+		},
+		{
+			videoId: '9bZkp7q19f0',
+			title: 'Thai Green Curry - Restaurant Quality',
+			thumbnailUrl: 'https://i.ytimg.com/vi/9bZkp7q19f0/medium.jpg',
+			description: 'Create authentic Thai green curry at home with professional cooking techniques.',
+			channelTitle: 'Asian Cuisine',
+			publishedAt: '2023-04-05T11:45:00Z',
+		},
+		{
+			videoId: 'MNyUw0d5bXY',
+			title: 'Sushi Rolling Masterclass',
+			thumbnailUrl: 'https://i.ytimg.com/vi/MNyUw0d5bXY/medium.jpg',
+			description: 'Learn the art of sushi rolling with expert techniques and fresh ingredients.',
+			channelTitle: 'Sushi Chef Academy',
+			publishedAt: '2023-05-12T16:20:00Z',
+		},
+		{
+			videoId: 'cRpdIrq7Rbo',
+			title: 'Beef Stir Fry - Quick & Easy',
+			thumbnailUrl: 'https://i.ytimg.com/vi/cRpdIrq7Rbo/medium.jpg',
+			description: 'Fast and delicious beef stir fry recipe perfect for weeknight dinners.',
+			channelTitle: 'Quick Meals',
+			publishedAt: '2023-06-08T13:00:00Z',
+		},
+		{
+			videoId: 'gQvQvERMoW0',
+			title: 'Creamy Salmon Pasta',
+			thumbnailUrl: 'https://i.ytimg.com/vi/gQvQvERMoW0/medium.jpg',
+			description: 'Elegant and simple salmon pasta with creamy sauce - perfect for special occasions.',
+			channelTitle: 'Fine Dining at Home',
+			publishedAt: '2023-07-22T10:30:00Z',
+		},
+		{
+			videoId: 'gODZzSOelME',
+			title: 'Homemade Bread Baking Guide',
+			thumbnailUrl: 'https://i.ytimg.com/vi/gODZzSOelME/medium.jpg',
+			description: 'Complete guide to baking perfect artisan bread at home with professional tips.',
+			channelTitle: 'Bread Bakers',
+			publishedAt: '2023-08-14T15:45:00Z',
+		},
+		{
+			videoId: 'pFUJEm8nTOE',
+			title: 'Chicken Tikka Masala Recipe',
+			thumbnailUrl: 'https://i.ytimg.com/vi/pFUJEm8nTOE/medium.jpg',
+			description: 'Authentic Indian chicken tikka masala made with aromatic spices and cream.',
+			channelTitle: 'Indian Cooking',
+			publishedAt: '2023-09-03T12:15:00Z',
+		},
+		{
+			videoId: 'Bxc_6fVbPLc',
+			title: 'Chocolate Lava Cake - Dessert',
+			thumbnailUrl: 'https://i.ytimg.com/vi/Bxc_6fVbPLc/medium.jpg',
+			description: 'Impress your guests with this elegant chocolate lava cake recipe.',
+			channelTitle: 'Dessert Creations',
+			publishedAt: '2023-10-11T14:20:00Z',
+		},
+		{
+			videoId: 'e4NLzh5Pq7Y',
+			title: 'Spanish Paella - Traditional Recipe',
+			thumbnailUrl: 'https://i.ytimg.com/vi/e4NLzh5Pq7Y/medium.jpg',
+			description: 'Learn to cook authentic Spanish paella with seafood and saffron.',
+			channelTitle: 'Spanish Cuisine',
+			publishedAt: '2023-11-05T17:00:00Z',
+		},
+		{
+			videoId: 'Y2WwLVcVZAA',
+			title: 'Vegetable Curry - Vegan Recipe',
+			thumbnailUrl: 'https://i.ytimg.com/vi/Y2WwLVcVZAA/medium.jpg',
+			description: 'Delicious and healthy vegan vegetable curry packed with flavor and nutrition.',
+			channelTitle: 'Plant Based Kitchen',
+			publishedAt: '2023-12-02T11:30:00Z',
+		},
+	];
+}
 export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null> {
 	try {
+		// Check if API key is configured
+		if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'your_api_key') {
+			console.log('[YouTube API] No valid API key. Using fallback mock data.');
+			// Use mock data when API key is not configured
+			return getMockVideos();
+		}
+
 		// Search parameters optimized for cooking content
 		const params = new URLSearchParams({
 			part: 'snippet',
@@ -105,7 +211,9 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			);
 			return videoCache.data;
 		}
-		return null;
+		// Fall back to mock data on error
+		console.log('[YouTube API] Falling back to mock data due to error');
+		return getMockVideos();
 	}
 }
 

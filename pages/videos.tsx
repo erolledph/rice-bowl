@@ -80,6 +80,13 @@ const VideosPage = () => {
 		setTimeout(() => setSelectedVideo(null), 300)
 	}
 
+	const handleRefresh = () => {
+		setLoading(true)
+		setError(null)
+		setVideos([])
+		window.location.reload()
+	}
+
 	return (
 		<Page>
 			<Section>
@@ -133,9 +140,15 @@ const VideosPage = () => {
 						<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-2'>
 							Unable to Load Videos
 						</p>
-						<p className='text-zinc-500 dark:text-zinc-500 max-w-md mx-auto'>
+						<p className='text-zinc-500 dark:text-zinc-500 max-w-md mx-auto mb-6'>
 							{error || 'We are having trouble loading videos right now. Please refresh the page to try again.'}
 						</p>
+						<button
+							onClick={handleRefresh}
+							className='px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold text-sm transition-colors'
+						>
+							Refresh Videos
+						</button>
 					</div>
 				)}
 
@@ -178,9 +191,15 @@ const VideosPage = () => {
 						<p className='text-lg text-zinc-600 dark:text-zinc-400 font-medium mb-2'>
 							No Videos Available
 						</p>
-						<p className='text-zinc-500 dark:text-zinc-500'>
+						<p className='text-zinc-500 dark:text-zinc-500 mb-6'>
 							Please try refreshing the page
 						</p>
+						<button
+							onClick={handleRefresh}
+							className='px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold text-sm transition-colors'
+						>
+							Refresh Videos
+						</button>
 					</div>
 				)}
 
