@@ -2,6 +2,9 @@
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
 
+// Cache configuration
+const CACHE_TTL_SECONDS = 21600; // 6 hours for featured videos
+
 /**
  * YouTube API V3 Quota System
  * 
