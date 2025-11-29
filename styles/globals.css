@@ -120,12 +120,9 @@ body {
 		color: #333 !important;
 	}
 }
-
-/* ──────── Super Clean YouTube Embed – No Title, No Junk (2025) ──────── */
 .youtube-clean {
-  @apply relative overflow-hidden;
+  @apply relative overflow-hidden bg-black;
   aspect-ratio: 16 / 9;
-  background: #000;
 }
 
 .youtube-clean iframe {
@@ -135,14 +132,13 @@ body {
   width: 300%;
   height: 100%;
   border: none;
-  pointer-events: auto; /* allows fullscreen & play/pause */
 }
 
-/* Extra safety – kill any remaining YouTube UI */
-.youtube-clean .ytp-chrome-top,
+/* Kill any leftover YouTube chrome */
+.youtube-clean ~ * .ytp-chrome-top,
 .youtube-clean .ytp-title,
 .youtube-clean .ytp-title-channel,
-.youtube-clean .ytp-show-cards-title,
-.youtube-clean .ytp-gradient-top {
+.youtube-clean .ytp-gradient-top,
+.youtube-clean .ytp-show-cards-title {
   display: none !important;
 }
