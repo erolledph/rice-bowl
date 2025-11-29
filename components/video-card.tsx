@@ -1,6 +1,7 @@
 import React from 'react'
 import { Maximize2 } from 'lucide-react'
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
+import Image from 'next/image' // <-- fixes the <img> warning too
 
 interface CookingVideo {
   videoId: string
@@ -13,7 +14,6 @@ interface CookingVideo {
 
 interface VideoCardProps {
   video: CookingVideo
-  onClick: (video: CookingVideo) => void
 }
 
 export default function VideoCard({ video }: VideoCardProps) {
@@ -26,41 +26,46 @@ export default function VideoCard({ video }: VideoCardProps) {
     setPlayingVideoId(null)
   }
 
+  // Properly typed fullscreen with Safari/iOS support
   const handleFullscreen = (e: React.MouseEvent) => {
     e.stopPropagation()
     const iframe = document.querySelector(
-      `[data-videoid="${video.videoId}"]`
-    ) as HTMLIFrameElement
+      `iframe[data-videoid="${video.videoId}"]`
+    ) as HTMLIFrameElement | null
 
     if (!iframe) return
 
-    // Use YouTube's native fullscreen (works perfectly)
-    if (iframe.requestFullscreen) {
-      iframe.requestFullscreen()
-      // @ts-ignore - Safari uses webkit prefix
-    } else if (iframe.webkitRequestFullscreen) {
-      iframe.webkitRequestFullscreen()
-      // @ts-ignore
-    } else if (iframe.msRequestFullscreen) {
-      iframe.msRequestFullscreen()
+    const requestFs = 
+      iframe.requestFullscreen ||
+      // @ts-ignore - Safari still uses webkit prefix in 2025
+      iframe.webkitRequestFullscreen ||
+      // @ts-ignore - very old Android
+      (iframe as any).mozRequestFullScreen ||
+      (iframe as any).msRequestFullscreen
+
+    if (requestFs) {
+      requestFs.call(iframe)
     }
   }
 
   return (
     <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
-      {/* Video / Thumbnail Container */}
+      {/* Thumbnail / Player */}
       <div className="relative w-full bg-black">
         {!isPlaying ? (
           <>
-            {/* Thumbnail */}
-            <img
+            {/* Optimized Next.js Image */}
+            <Image
               src={video.thumbnailUrl}
               alt={video.title}
+              width={480}
+              height={270}
               className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
+              unoptimized // YouTube thumbnails are already optimized
             />
 
             {/* Play Overlay */}
-            <div
+            <button
               onClick={handlePlay}
               className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors"
             >
@@ -69,34 +74,33 @@ export default function VideoCard({ video }: VideoCardProps) {
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
-            </div>
+            </button>
           </>
         ) : (
-          /* ──────── CLEAN YOUTUBE PLAYER (NO TITLE BAR) ──────── */
-          <div className="youtube-clean" data-videoid={video.videoId}>
+          /* ──────── Super Clean YouTube Embed (2025) ──────── */
+          <div className="youtube-clean">
             <iframe
               data-videoid={video.videoId}
               src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1&cc_load_policy=0&iv_load_policy=3`}
               title={video.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="w-full h-full"
+              className="pointer-events-auto"
             />
           </div>
         )}
       </div>
 
-      {/* Card Content */}
+      {/* Title */}
       <div className="p-4">
         <h3 className="font-bold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
           {video.title}
         </h3>
       </div>
 
-      {/* Floating Controls when playing */}
+      {/* Floating Controls */}
       {isPlaying && (
         <div className="absolute top-3 right-3 flex gap-2 z-10">
-          {/* Fullscreen Button */}
           <button
             onClick={handleFullscreen}
             className="p-2.5 bg-black/70 hover:bg-black/90 text-white rounded-lg backdrop-blur-sm transition-all"
@@ -105,7 +109,6 @@ export default function VideoCard({ video }: VideoCardProps) {
             <Maximize2 className="w-4 h-4" />
           </button>
 
-          {/* Stop Button */}
           <button
             onClick={handleStop}
             className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all"
