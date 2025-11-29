@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getCachedVideos, setCachedVideos, initializeCacheCleanup } from '@/lib/video-cache';
 
 interface YouTubeVideo {
 	videoId: string;
@@ -9,12 +10,20 @@ interface YouTubeVideo {
 	publishedAt: string;
 }
 
+interface CachedVideoData {
+	videos: YouTubeVideo[];
+	nextPageToken: string | null;
+	timestamp: number;
+	source: 'youtube' | 'mock';
+}
+
 interface ApiResponse {
 	status: 'success' | 'error';
 	videos?: YouTubeVideo[];
 	message?: string;
 	nextPageToken?: string | null;
-	source?: 'youtube' | 'mock';
+	source?: 'youtube' | 'mock' | 'cache';
+	cached?: boolean;
 }
 
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
@@ -77,6 +86,12 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<ApiResponse>
 ) {
+	// Initialize cache cleanup on first request
+	if (!(global as any).cacheCleanupInitialized) {
+		initializeCacheCleanup();
+		(global as any).cacheCleanupInitialized = true;
+	}
+
 	// Allow CORS for frontend requests
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -98,15 +113,43 @@ export default async function handler(
 			});
 		}
 
+		// Check cache first - this is the key optimization
+		const cacheKey = pageToken ? `${q}:${pageToken}` : q;
+		const cachedData = getCachedVideos(q.trim(), pageToken as string | undefined);
+
+		if (cachedData) {
+			console.log(
+				`[Search Videos API] Cache hit for "${q}" (${cachedData.videos.length} videos, source: ${cachedData.source})`
+			);
+			return res.status(200).json({
+				status: 'success',
+				videos: cachedData.videos,
+				nextPageToken: cachedData.nextPageToken,
+				source: cachedData.source,
+				cached: true,
+				message: `Cached results (${cachedData.source})`,
+			});
+		}
+
+		console.log(`[Search Videos API] Cache miss for "${q}", fetching fresh data...`);
+
 		// Check if API key is configured
 		if (!YOUTUBE_API_KEY) {
 			console.log('[Search Videos API] No YouTube API key, using mock data');
 			const mockVideos = generateMockVideos(q.trim(), 20);
+			const responseData: CachedVideoData = {
+				videos: mockVideos,
+				nextPageToken: null,
+				timestamp: Date.now(),
+				source: 'mock',
+			};
+			setCachedVideos(q.trim(), responseData);
 			return res.status(200).json({
 				status: 'success',
 				videos: mockVideos,
 				nextPageToken: null,
 				source: 'mock',
+				cached: false,
 			});
 		}
 
@@ -141,11 +184,19 @@ export default async function handler(
 			// Fallback to mock data on API error
 			console.log('[Search Videos API] Falling back to mock data due to YouTube API error');
 			const mockVideos = generateMockVideos(q.trim(), 20);
+			const responseData: CachedVideoData = {
+				videos: mockVideos,
+				nextPageToken: null,
+				timestamp: Date.now(),
+				source: 'mock',
+			};
+			setCachedVideos(q.trim(), responseData);
 			return res.status(200).json({
 				status: 'success',
 				videos: mockVideos,
 				nextPageToken: null,
 				source: 'mock',
+				cached: false,
 				message: 'Using mock data due to API limitations',
 			});
 		}
@@ -176,11 +227,21 @@ export default async function handler(
 			`[Search Videos API] Found ${videos.length} real YouTube videos for "${q}"`
 		);
 
+		// Cache the successful YouTube response
+		const responseData: CachedVideoData = {
+			videos,
+			nextPageToken: data.nextPageToken || null,
+			timestamp: Date.now(),
+			source: 'youtube',
+		};
+		setCachedVideos(q.trim(), responseData, pageToken as string | undefined);
+
 		return res.status(200).json({
 			status: 'success',
 			videos,
 			nextPageToken: data.nextPageToken || null,
 			source: 'youtube',
+			cached: false,
 		});
 	} catch (error: any) {
 		console.error('[Search Videos API] Error:', error.message);
@@ -188,12 +249,20 @@ export default async function handler(
 		// Fallback to mock data on any error
 		const q = Array.isArray(req.query.q) ? req.query.q[0] : req.query.q;
 		const mockVideos = generateMockVideos((q as string) || 'cooking', 20);
+		const responseData: CachedVideoData = {
+			videos: mockVideos,
+			nextPageToken: null,
+			timestamp: Date.now(),
+			source: 'mock',
+		};
+		setCachedVideos((q as string) || 'cooking', responseData);
 
 		return res.status(200).json({
 			status: 'success',
 			videos: mockVideos,
 			nextPageToken: null,
 			source: 'mock',
+			cached: false,
 			message: 'Using mock data due to connectivity issues',
 		});
 	}
