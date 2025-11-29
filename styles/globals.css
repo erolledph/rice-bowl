@@ -120,6 +120,9 @@ body {
 		color: #333 !important;
 	}
 }
+
+
+
 .youtube-clean {
   @apply relative overflow-hidden bg-black;
   aspect-ratio: 16 / 9;
@@ -132,13 +135,16 @@ body {
   width: 300%;
   height: 100%;
   border: none;
+  pointer-events: auto;
 }
 
-/* Kill any leftover YouTube chrome */
+/* Hide all YouTube junk */
 .youtube-clean ~ * .ytp-chrome-top,
+.youtube-clean .ytp-chrome-top,
 .youtube-clean .ytp-title,
 .youtube-clean .ytp-title-channel,
 .youtube-clean .ytp-gradient-top,
-.youtube-clean .ytp-show-cards-title {
+.youtube-clean .ytp-show-cards-title,
+.youtube-clean .ytp-watch-later-button {
   display: none !important;
 }
