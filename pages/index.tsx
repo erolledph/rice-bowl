@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Head from 'next/head'
 import Appbar from '@/components/appbar'
 import BottomNav from '@/components/bottom-nav'
+import Footer from '@/components/footer'
 import Hero from '@/components/hero'
 import RecipeCard from '@/components/recipe-card'
 import { useRecipes } from '@/hooks/useRecipes'
@@ -17,12 +18,10 @@ const Index = () => {
 				<title>Rice Bowl | Home</title>
 			</Head>
 
-			<Appbar />
+		<Appbar />
 
-			<main className='mx-auto min-h-screen bg-white dark:bg-zinc-900 pt-20 pb-24 sm:pb-0'>
-			<Hero />
-
-			{/* Featured Recipes Section - Full Width Airbnb Style */}
+		<main className='mx-auto min-h-screen bg-white dark:bg-zinc-900 pt-20 pb-24 lg:pb-0'>
+		<Hero />			{/* Featured Recipes Section - Full Width Airbnb Style */}
 			<div className='w-full py-12 px-6 md:px-10 lg:px-20'>
 				<div className='max-w-[2520px] mx-auto'>
 					<div className='mb-8'>
@@ -78,6 +77,7 @@ const Index = () => {
 			</main>
 
 			<BottomNav />
+			<Footer />
 		</>
 	)
 }
