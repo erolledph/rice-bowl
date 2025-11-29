@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -121,30 +120,20 @@ body {
 	}
 }
 
-
-
-.youtube-clean {
-  @apply relative overflow-hidden bg-black;
-  aspect-ratio: 16 / 9;
+/* YouTube Embed - Hide Channel/Title Details */
+.youtube-container-hidden-details {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	aspect-ratio: 16/9;
+	pointer-events: auto;
 }
 
-.youtube-clean iframe {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 300%;
-  height: 100%;
-  border: none;
-  pointer-events: auto;
-}
-
-/* Hide all YouTube junk */
-.youtube-clean ~ * .ytp-chrome-top,
-.youtube-clean .ytp-chrome-top,
-.youtube-clean .ytp-title,
-.youtube-clean .ytp-title-channel,
-.youtube-clean .ytp-gradient-top,
-.youtube-clean .ytp-show-cards-title,
-.youtube-clean .ytp-watch-later-button {
-  display: none !important;
+.youtube-container-hidden-details iframe {
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 300%;
+	height: 100%;
 }
