@@ -1,34 +1,86 @@
-// YouTube API configuration
+// YouTube API configuration for massive scale (100k+ daily visitors)
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
-const CACHE_TTL_SECONDS = 7200; // 2 hours
+
+/**
+ * YouTube API V3 Quota System
+ * 
+ * Free Tier: 10,000 units per day (resets at midnight UTC)
+ * 
+ * Cost breakdown:
+ * - search.list: 100 units
+ * - videos.list: 1 unit
+ * - channels.list: 1 unit
+ * 
+ * For 100k daily visitors:
+ * 10,000 units ÷ 86,400 seconds = 0.115 units/second
+ * = ~416 units/hour (17 search requests max per hour)
+ * 
+ * Strategy:
+ * - Featured videos: 6-hour cache (2 API calls/day)
+ * - Search results: 30-minute cache (48 API calls/day)  
+ * - Recipe blog posts: 24-hour cache (0-1 API calls/day)
+ * - Total: ~50 API calls/day = 5,000 quota units (50% reserve)
+ */
 
 // Quota tracking
 let quotaUsedToday = 0;
-let quotaResetTime = Date.now() + 24 * 60 * 60 * 1000; // UTC midnight
+let quotaHourly: { [hour: number]: number } = {};
+let quotaResetTime = getUTCMidnight();
+let lastHourChecked = new Date().getUTCHours();
 
-// In-memory cache store (with versioning)
+const QUOTA_CONFIG = {
+  DAILY_LIMIT: 10000,
+  HOURLY_BUDGET: Math.floor(10000 / 24), // 416 units/hour
+  SEARCH_COST: 100,
+  VIDEO_COST: 1,
+  WARNING_THRESHOLD: 8000, // 80% of 10k
+  CRITICAL_THRESHOLD: 9500, // 95% of 10k
+};
+
+function getUTCMidnight(): number {
+  const now = new Date();
+  const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+  return midnight.getTime();
+}
+
+function getCurrentHour(): number {
+  return new Date().getUTCHours();
+}
+
+function resetHourlyQuotaIfNeeded(): void {
+  const currentHour = getCurrentHour();
+  if (currentHour !== lastHourChecked) {
+    quotaHourly[currentHour] = 0;
+    lastHourChecked = currentHour;
+    console.log(`[YouTube API] Hourly quota reset. Hour: ${currentHour}`);
+  }
+}
+
+// In-memory cache store with advanced tracking
 interface VideoCache {
-	data: CookingVideo[] | null;
-	timestamp: number;
-	etag: string | null;
-	quotaUsed: number;
+  data: CookingVideo[] | null;
+  timestamp: number;
+  etag: string | null;
+  quotaUsed: number;
+  source: 'api' | 'cache' | 'fallback';
 }
 
 interface CookingVideo {
-	videoId: string;
-	title: string;
-	thumbnailUrl: string;
-	description: string;
-	channelTitle: string;
-	publishedAt: string;
+  videoId: string;
+  title: string;
+  thumbnailUrl: string;
+  description: string;
+  channelTitle: string;
+  publishedAt: string;
 }
 
 let videoCache: VideoCache = {
-	data: null,
-	timestamp: 0,
-	etag: null,
-	quotaUsed: 0,
+  data: null,
+  timestamp: 0,
+  etag: null,
+  quotaUsed: 0,
+  source: 'fallback',
 };
 
 /**
@@ -136,25 +188,54 @@ function getMockVideos(): CookingVideo[] {
 }
 export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null> {
 	try {
+		resetHourlyQuotaIfNeeded();
+
 		// Check if API key is configured
 		if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'your_api_key') {
 			console.log('[YouTube API] No valid API key. Using fallback mock data.');
-			// Use mock data when API key is not configured
+			videoCache.source = 'fallback';
 			return getMockVideos();
 		}
 
-		// Reset quota counter if new day
+		// Reset daily quota if new day
 		if (Date.now() > quotaResetTime) {
 			quotaUsedToday = 0;
-			quotaResetTime = Date.now() + 24 * 60 * 60 * 1000;
+			quotaHourly = {};
+			quotaResetTime = getUTCMidnight();
+			console.log('[YouTube API] ✅ Daily quota reset at UTC midnight');
 		}
 
-		// Warn if approaching quota limit (10,000 units/day typical)
-		if (quotaUsedToday > 9000) {
-			console.warn(`[YouTube API] ⚠️ High quota usage: ${quotaUsedToday}/10000`);
-			// Return cached data instead of making new request
-			if (videoCache.data) {
+		// Check hourly budget (416 units max per hour = ~4 search requests)
+		const currentHour = getCurrentHour();
+		const hourlyUsed = quotaHourly[currentHour] || 0;
+		const hourlyRemaining = QUOTA_CONFIG.HOURLY_BUDGET - hourlyUsed;
+
+		// Smart quota management for 100k daily visitors
+		if (quotaUsedToday > QUOTA_CONFIG.CRITICAL_THRESHOLD) {
+			console.warn(
+				`[YouTube API] 🔴 CRITICAL: ${quotaUsedToday}/${QUOTA_CONFIG.DAILY_LIMIT} quota used. Using mock data.`
+			);
+			videoCache.source = 'fallback';
+			return getMockVideos();
+		}
+
+		if (quotaUsedToday > QUOTA_CONFIG.WARNING_THRESHOLD) {
+			console.warn(
+				`[YouTube API] 🟡 WARNING: ${quotaUsedToday}/${QUOTA_CONFIG.DAILY_LIMIT} quota used (${((quotaUsedToday / QUOTA_CONFIG.DAILY_LIMIT) * 100).toFixed(1)}%).`
+			);
+			// Return cached data if available to preserve quota
+			if (videoCache.data && videoCache.source === 'cache') {
 				console.log('[YouTube API] Using cache due to quota concerns');
+				return videoCache.data;
+			}
+		}
+
+		if (hourlyRemaining <= 100) {
+			console.log(
+				`[YouTube API] ⏱️ Hourly quota low (${hourlyRemaining}/${QUOTA_CONFIG.HOURLY_BUDGET} units). Using cache.`
+			);
+			if (videoCache.data) {
+				videoCache.source = 'cache';
 				return videoCache.data;
 			}
 		}
@@ -168,8 +249,6 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			maxResults: '12', // Show 12 videos in dropdown
 			key: YOUTUBE_API_KEY || '',
 			order: 'relevance',
-			// Optimization: only get snippet to save quota
-			// Alternative: use part=id then batch fetch snippets
 		});
 
 		const headers: HeadersInit = {};
@@ -179,17 +258,20 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			headers['If-None-Match'] = videoCache.etag;
 		}
 
-		console.log('[YouTube API] Fetching cooking videos...');
+		console.log(`[YouTube API] Fetching cooking videos... (Quota: ${quotaUsedToday}/${QUOTA_CONFIG.DAILY_LIMIT})`);
 
 		const response = await fetch(`${YOUTUBE_SEARCH_URL}?${params}`, {
 			headers,
-			next: { revalidate: 60 }, // ISR: revalidate every 60 seconds
+			next: { revalidate: 60 },
 		});
 
-		// HTTP 304 Not Modified: Cache is still fresh (0 quota cost)
+		// HTTP 304 Not Modified: Cache is still fresh (0 quota cost) ✅
 		if (response.status === 304) {
-			console.log('[YouTube API] Content not modified (304). Cache still valid. Quota saved: 100');
+			console.log(
+				`[YouTube API] ✅ 304 Not Modified (0 quota used). Quota: ${quotaUsedToday}/${QUOTA_CONFIG.DAILY_LIMIT}`
+			);
 			videoCache.timestamp = Date.now();
+			videoCache.source = 'cache';
 			return videoCache.data;
 		}
 
@@ -201,25 +283,28 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 		const data = await response.json();
 
 		// Track quota usage
-		quotaUsedToday += 100; // Standard search: 100 units
-		console.log(`[YouTube API] Quota used: ${quotaUsedToday}/10000 (updated +100)`);
+		quotaUsedToday += QUOTA_CONFIG.SEARCH_COST;
+		quotaHourly[currentHour] = (quotaHourly[currentHour] || 0) + QUOTA_CONFIG.SEARCH_COST;
+
+		console.log(
+			`[YouTube API] 📊 Quota updated: ${quotaUsedToday}/${QUOTA_CONFIG.DAILY_LIMIT} ` +
+			`(Hour ${currentHour}: ${quotaHourly[currentHour]}/${QUOTA_CONFIG.HOURLY_BUDGET})`
+		);
 
 		// Extract ETag for next request
 		const newEtag = response.headers.get('etag');
 
 		// Process and store videos
-		const videos: CookingVideo[] = (data.items || []).map(
-			(item: any) => ({
-				videoId: item.id.videoId,
-				title: item.snippet.title,
-				thumbnailUrl:
-					item.snippet.thumbnails.medium?.url ||
-					item.snippet.thumbnails.default?.url,
-				description: item.snippet.description,
-				channelTitle: item.snippet.channelTitle,
-				publishedAt: item.snippet.publishedAt,
-			})
-		);
+		const videos: CookingVideo[] = (data.items || []).map((item: any) => ({
+			videoId: item.id.videoId,
+			title: item.snippet.title,
+			thumbnailUrl:
+				item.snippet.thumbnails.medium?.url ||
+				item.snippet.thumbnails.default?.url,
+			description: item.snippet.description,
+			channelTitle: item.snippet.channelTitle,
+			publishedAt: item.snippet.publishedAt,
+		}));
 
 		// Update cache
 		videoCache = {
@@ -227,21 +312,22 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			timestamp: Date.now(),
 			etag: newEtag,
 			quotaUsed: quotaUsedToday,
+			source: 'api',
 		};
 
-		console.log(`[YouTube API] Cache updated with ${videos.length} videos.`);
+		console.log(`[YouTube API] ✅ Cache updated with ${videos.length} videos.`);
 		return videos;
 	} catch (error) {
 		console.error('[YouTube API] Error fetching videos:', error);
 		// Return stale cache if available
 		if (videoCache.data) {
-			console.log(
-				'[YouTube API] Returning stale cache data due to error'
-			);
+			console.log('[YouTube API] Returning stale cache data due to error');
+			videoCache.source = 'cache';
 			return videoCache.data;
 		}
 		// Fall back to mock data on error
 		console.log('[YouTube API] Falling back to mock data due to error');
+		videoCache.source = 'fallback';
 		return getMockVideos();
 	}
 }
@@ -261,34 +347,74 @@ export function getCachedVideos(): CookingVideo[] | null {
 }
 
 /**
- * Get current quota usage
+ * Get detailed quota status for 100k daily visitors
  */
 export function getQuotaStatus(): {
 	used: number;
 	limit: number;
+	remaining: number;
 	percentUsed: number;
-	resetIn: string;
 	status: 'ok' | 'warning' | 'critical';
+	hourlyBudget: {
+		used: number;
+		limit: number;
+		percentUsed: number;
+		remaining: number;
+	};
+	resetIn: string;
+	dailyRate: {
+		perHour: number;
+		perMinute: number;
+		perSecond: number;
+	};
+	estimatedRequestsRemaining: {
+		searches: number;
+		videos: number;
+	};
 } {
+	resetHourlyQuotaIfNeeded();
+
 	const now = Date.now();
 	const timeUntilReset = quotaResetTime - now;
 	const hours = Math.floor(timeUntilReset / (60 * 60 * 1000));
 	const minutes = Math.floor((timeUntilReset % (60 * 60 * 1000)) / (60 * 1000));
 	const resetIn = `${hours}h ${minutes}m`;
 
-	const limit = 10000; // YouTube API default daily limit
+	const limit = QUOTA_CONFIG.DAILY_LIMIT;
+	const remaining = Math.max(0, limit - quotaUsedToday);
 	const percentUsed = (quotaUsedToday / limit) * 100;
 
+	const currentHour = getCurrentHour();
+	const hourlyUsed = quotaHourly[currentHour] || 0;
+	const hourlyRemaining = Math.max(0, QUOTA_CONFIG.HOURLY_BUDGET - hourlyUsed);
+	const hourlyPercentUsed = (hourlyUsed / QUOTA_CONFIG.HOURLY_BUDGET) * 100;
+
 	let status: 'ok' | 'warning' | 'critical' = 'ok';
-	if (percentUsed > 90) status = 'critical';
-	else if (percentUsed > 70) status = 'warning';
+	if (percentUsed > 95) status = 'critical';
+	else if (percentUsed > 80) status = 'warning';
 
 	return {
 		used: quotaUsedToday,
 		limit,
+		remaining,
 		percentUsed: parseFloat(percentUsed.toFixed(2)),
-		resetIn,
 		status,
+		hourlyBudget: {
+			used: hourlyUsed,
+			limit: QUOTA_CONFIG.HOURLY_BUDGET,
+			percentUsed: parseFloat(hourlyPercentUsed.toFixed(2)),
+			remaining: hourlyRemaining,
+		},
+		resetIn,
+		dailyRate: {
+			perHour: QUOTA_CONFIG.HOURLY_BUDGET,
+			perMinute: Math.round(QUOTA_CONFIG.HOURLY_BUDGET / 60),
+			perSecond: parseFloat((QUOTA_CONFIG.HOURLY_BUDGET / 3600).toFixed(3)),
+		},
+		estimatedRequestsRemaining: {
+			searches: Math.floor(remaining / QUOTA_CONFIG.SEARCH_COST),
+			videos: Math.floor(remaining / QUOTA_CONFIG.VIDEO_COST),
+		},
 	};
 }
 

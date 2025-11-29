@@ -317,11 +317,20 @@ class CacheSystem<T = any> {
 }
 
 /**
- * Global cache instances
+ * Global cache instances optimized for 100k+ daily visitors
+ * 
+ * Scale: 100k visitors/day = 3.6M/month
+ * 
+ * Cache TTL Strategy:
+ * - Recipes (blog posts): 24 hours (stable, long-lived content)
+ * - Featured videos: 6 hours (semi-stable, curator-selected)
+ * - Video searches: 30 minutes (dynamic, user-driven)
+ * - API responses: 5 minutes (real-time needed)
  */
-export const recipeCache = new CacheSystem(3600); // 1 hour
-export const videoCache = new CacheSystem(7200); // 2 hours
-export const apiCache = new CacheSystem(300); // 5 minutes
+export const recipeCache = new CacheSystem(86400); // 24 hours - blog posts are very stable
+export const videoCache = new CacheSystem(21600); // 6 hours - featured videos
+export const searchCache = new CacheSystem(1800); // 30 minutes - search results are user-driven
+export const apiCache = new CacheSystem(300); // 5 minutes - other APIs
 
 /**
  * Utility function to get cache key with prefix
