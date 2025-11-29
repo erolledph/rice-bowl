@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Appbar from '@/components/appbar'
 import BottomNav from '@/components/bottom-nav'
+import Footer from '@/components/footer'
 
 interface Props {
 	title?: string
@@ -20,14 +21,15 @@ const Page = ({ title, children }: Props) => (
 		<main
 			/**
 			 * Padding top = `appbar` height
-			 * Padding bottom = `bottom-nav` height
+			 * Padding bottom = `bottom-nav` height on mobile, normal on desktop
 			 */
-			className='mx-auto max-w-screen-md pt-20 pb-24 px-safe sm:pb-0'
+			className='mx-auto max-w-screen-xl pt-20 pb-24 px-safe lg:pb-0'
 		>
 			<div className='p-6'>{children}</div>
 		</main>
 
 		<BottomNav />
+		<Footer />
 	</>
 )
 
