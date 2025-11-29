@@ -121,29 +121,28 @@ body {
 	}
 }
 
-/* YouTube Embed - Hide Channel/Title Details */
-.youtube-container-hidden-details {
-	position: relative;
-	overflow: hidden;
-	width: 100%;
-	height: 100%;
-	aspect-ratio: 16/9;
-	pointer-events: auto;
+/* ──────── Super Clean YouTube Embed – No Title, No Junk (2025) ──────── */
+.youtube-clean {
+  @apply relative overflow-hidden;
+  aspect-ratio: 16 / 9;
+  background: #000;
 }
 
-.youtube-container-hidden-details iframe {
-	position: absolute;
-	top: 0;
-	left: -100%;
-	width: 300%;
-	height: 100%;
+.youtube-clean iframe {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 300%;
+  height: 100%;
+  border: none;
+  pointer-events: auto; /* allows fullscreen & play/pause */
 }
 
-/* Extra safety: hide any remaining title elements */
-.ytp-title,
-.ytp-title-text,
-.ytp-title-channel,
-.ytp-chrome-top,
-.ytp-show-cards-title {
+/* Extra safety – kill any remaining YouTube UI */
+.youtube-clean .ytp-chrome-top,
+.youtube-clean .ytp-title,
+.youtube-clean .ytp-title-channel,
+.youtube-clean .ytp-show-cards-title,
+.youtube-clean .ytp-gradient-top {
   display: none !important;
 }
