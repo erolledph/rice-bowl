@@ -114,7 +114,7 @@ const SearchPage = () => {
 									<Tags className='w-5 h-5 text-orange-500 dark:text-orange-400 mt-1 flex-shrink-0' />
 									<div>
 										<p className='font-semibold text-zinc-900 dark:text-zinc-50 mb-2'>
-											Found {results.length} recipe{results.length !== 1 ? 's' : ''} matching "{searchQuery}"
+											Found {results.length} recipe{results.length !== 1 ? 's' : ''} matching &quot;{searchQuery}&quot;
 										</p>
 										<p className='text-sm text-zinc-600 dark:text-zinc-400'>
 											Results are shown for matching ingredients, cuisines, tastes, and other keywords
