@@ -38,31 +38,22 @@ export default async function handler(
 		if (!videos || shouldRefresh) {
 			console.log('[API] Cache expired or missing. Refreshing...');
 
-			// Trigger async refresh (non-blocking)
-			// Don't await - let it refresh in background
-			refreshCookingVideosCache()
-				.then(() => {
-					lastRefreshTime = Date.now();
-					console.log('[API] Background cache refresh complete');
-				})
-				.catch((error) => {
-					console.error('[API] Background refresh failed:', error);
-				});
-
-			// Try to get cached data first
-			videos = getCachedVideos();
+			// Await the refresh to ensure we have data
+			videos = await refreshCookingVideosCache();
+			lastRefreshTime = Date.now();
+			console.log('[API] Cache refresh complete');
 
 			if (!videos) {
-				// No data available yet
-				return res.status(503).json({
+				// This shouldn't happen, but handle it gracefully
+				return res.status(500).json({
 					status: 'error',
-					message: 'Videos data is loading. Please try again in a moment.',
+					message: 'Failed to fetch cooking videos.',
 				});
 			}
 
 			return res.status(200).json({
 				status: 'success',
-				source: 'stale-cache',
+				source: 'fresh',
 				videos,
 			});
 		}
