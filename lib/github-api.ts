@@ -266,6 +266,42 @@ export async function createRecipePost(
 }
 
 /**
+ * Update an existing recipe post on GitHub
+ */
+export async function updateRecipePost(
+	recipe: RecipeData,
+	owner: string,
+	repo: string,
+	token: string
+): Promise<GitHubCommitResponse> {
+	const filePath = `app/recipes/${recipe.slug}.md`
+	const content = formatRecipeAsMarkdown(recipe)
+	const message = `Update recipe: ${recipe.name}`
+
+	try {
+		// Fetch the current file to get its SHA
+		const fileData = await getFileContent(owner, repo, filePath, token)
+
+		if (!fileData) {
+			throw new Error('Recipe file not found')
+		}
+
+		return createOrUpdateFile(
+			owner,
+			repo,
+			filePath,
+			content,
+			message,
+			token,
+			fileData.sha
+		)
+	} catch (error) {
+		console.error('Error updating recipe on GitHub:', error)
+		throw error
+	}
+}
+
+/**
  * Delete a recipe post from GitHub
  */
 export async function deleteRecipePost(

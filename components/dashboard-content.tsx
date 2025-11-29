@@ -9,7 +9,7 @@ import Page from '@/components/page'
 import Section from '@/components/section'
 import { useAdmin } from '@/contexts/AdminContext'
 import { useRecipes } from '@/hooks/useRecipes'
-import { createRecipePost, deleteRecipePost } from '@/lib/github-api'
+import { createRecipePost, updateRecipePost, deleteRecipePost } from '@/lib/github-api'
 
 interface NewRecipeForm {
 	name: string
@@ -38,6 +38,7 @@ export const DashboardContent = () => {
 	const [message, setMessage] = useState('')
 	const [messageType, setMessageType] = useState<'success' | 'error' | ''>('')
 	const [deletingSlug, setDeletingSlug] = useState<string | null>(null)
+	const [editingSlug, setEditingSlug] = useState<string | null>(null)
 
 	useEffect(() => {
 		// Redirect if not logged in
@@ -135,75 +136,87 @@ export const DashboardContent = () => {
 					.filter((i) => i),
 			}
 
-			// Push to GitHub
-			if (gitHubOwner && gitHubRepo && gitHubToken) {
-				try {
-					await createRecipePost(
-						{
-							name: newRecipe.name,
-							slug: newRecipe.slug,
-							description: newRecipe.description,
-							servings: newRecipe.servings,
-							cookTime: newRecipe.cookTime,
-							prepTime: newRecipe.prepTime,
-							difficulty: newRecipe.difficulty,
-							image: newRecipe.image,
-							mealType: newRecipe.tags.meal,
-							protein: newRecipe.tags.meat,
-							country: newRecipe.tags.country,
-							ingredients: newRecipe.ingredients,
-							instructions: newRecipe.instructions,
-							tastes: newRecipe.tags.taste,
-							ingredients_tags: newRecipe.tags.ingredient,
-						},
+		// Push to GitHub
+		if (gitHubOwner && gitHubRepo && gitHubToken) {
+			try {
+				const recipeData = {
+					name: newRecipe.name,
+					slug: newRecipe.slug,
+					description: newRecipe.description,
+					servings: newRecipe.servings,
+					cookTime: newRecipe.cookTime,
+					prepTime: newRecipe.prepTime,
+					difficulty: newRecipe.difficulty,
+					image: newRecipe.image,
+					mealType: newRecipe.tags.meal,
+					protein: newRecipe.tags.meat,
+					country: newRecipe.tags.country,
+					ingredients: newRecipe.ingredients,
+					instructions: newRecipe.instructions,
+					tastes: newRecipe.tags.taste,
+					ingredients_tags: newRecipe.tags.ingredient,
+				}
+
+				if (editingSlug) {
+					// Update existing recipe
+					await updateRecipePost(
+						recipeData,
 						gitHubOwner,
 						gitHubRepo,
 						gitHubToken
 					)
-					
-					// Refetch recipes to show the new one immediately
-					await refetchRecipes()
-					
+					setMessage(`✅ Recipe "${newRecipe.name}" updated and committed to GitHub!`)
+					setMessageType('success')
+				} else {
+					// Create new recipe
+					await createRecipePost(
+						recipeData,
+						gitHubOwner,
+						gitHubRepo,
+						gitHubToken
+					)
 					setMessage(`✅ Recipe "${newRecipe.name}" created and committed to GitHub!`)
 					setMessageType('success')
-				} catch (githubError) {
-					setMessage(
-						`⚠️ Recipe created locally but GitHub commit failed: ${githubError instanceof Error ? githubError.message : 'Unknown error'}`
-					)
-					setMessageType('error')
 				}
-			} else {
-				setMessage('⚠️ GitHub credentials not configured. Recipe saved locally only.')
+				
+				// Refetch recipes to show the changes immediately
+				await refetchRecipes()
+			} catch (githubError) {
+				setMessage(
+					`⚠️ Recipe ${editingSlug ? 'update' : 'creation'} failed: ${githubError instanceof Error ? githubError.message : 'Unknown error'}`
+				)
 				setMessageType('error')
 			}
-
-			// Reset form
-			setFormData({
-				name: '',
-				slug: '',
-				description: '',
-				servings: 2,
-				cookTime: 30,
-				prepTime: 15,
-				difficulty: 'Easy',
-				image: '',
-				mealType: 'Lunch',
-				protein: 'None',
-				country: '',
-				ingredients: '',
-				instructions: '',
-				tastes: '',
-				ingredients_tags: '',
-			})
-		} catch (error) {
-			setMessage('Error creating recipe: ' + (error instanceof Error ? error.message : 'Unknown error'))
-			setMessageType('error')
-		}
-
-		setLoading(false)
+	} else {
+		setMessage('⚠️ GitHub credentials not configured. Recipe saved locally only.')
+		setMessageType('error')
+	}
+		// Reset form
+		setFormData({
+			name: '',
+			slug: '',
+			description: '',
+			servings: 2,
+			cookTime: 30,
+			prepTime: 15,
+			difficulty: 'Easy',
+			image: '',
+			mealType: 'Lunch',
+			protein: 'None',
+			country: '',
+			ingredients: '',
+			instructions: '',
+			tastes: '',
+			ingredients_tags: '',
+		})
+		setEditingSlug(null)
+	} catch (error) {
+		setMessage('Error creating recipe: ' + (error instanceof Error ? error.message : 'Unknown error'))
+		setMessageType('error')
 	}
 
-	const handleDeleteRecipe = async (slug: string) => {
+	setLoading(false)
+}	const handleDeleteRecipe = async (slug: string) => {
 		if (!confirm(`Are you sure you want to delete this recipe? This action cannot be undone.`)) {
 			return
 		}
@@ -269,22 +282,20 @@ export const DashboardContent = () => {
 								? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
 								: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
 						}`}
-					>
-						📚 All Recipes ({recipes.length})
-					</button>
-					<button
-						onClick={() => setActiveTab('create')}
-						className={`px-6 py-3 font-bold rounded-lg transition-all ${
-							activeTab === 'create'
-								? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-								: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
-						}`}
-					>
-						✨ Create Recipe
-					</button>
-				</div>
-
-				<div className='mb-8'>
+				>
+					📚 All Recipes ({recipes.length})
+				</button>
+				<button
+					onClick={() => setActiveTab('create')}
+					className={`px-6 py-3 font-bold rounded-lg transition-all ${
+						activeTab === 'create'
+							? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+							: 'text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
+					}`}
+				>
+					✨ {editingSlug ? 'Edit Recipe' : 'Create Recipe'}
+				</button>
+			</div>				<div className='mb-8'>
 
 				{/* Recipes List Tab */}
 				{activeTab === 'recipes' && (
@@ -372,36 +383,35 @@ export const DashboardContent = () => {
 															<Eye className='w-5 h-5' />
 														</a>
 
-														{/* Edit */}
-														<button
-															onClick={() => {
-																// Pre-fill form with recipe data
-																setFormData({
-																	name: recipe.name,
-																	slug: recipe.slug,
-																	description: recipe.description,
-																	servings: recipe.servings,
-																	cookTime: recipe.cookTime,
-																	prepTime: recipe.prepTime,
-																	difficulty: recipe.difficulty as 'Easy' | 'Medium' | 'Hard',
-																	image: recipe.image,
-																	mealType: recipe.tags.meal,
-																	protein: recipe.tags.meat,
-																	country: recipe.tags.country,
-																	ingredients: recipe.ingredients.join('\n'),
-																	instructions: recipe.instructions.join('\n'),
-																	tastes: recipe.tags.taste.join(', '),
-																	ingredients_tags: recipe.tags.ingredient.join(', '),
-																})
-																setActiveTab('create')
-															}}
-															title='Edit recipe'
-															className='p-2 rounded-lg bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors'
-														>
-															<Edit className='w-5 h-5' />
-														</button>
-
-														{/* Delete */}
+													{/* Edit */}
+													<button
+														onClick={() => {
+															// Pre-fill form with recipe data
+															setFormData({
+																name: recipe.name,
+																slug: recipe.slug,
+																description: recipe.description,
+																servings: recipe.servings,
+																cookTime: recipe.cookTime,
+																prepTime: recipe.prepTime,
+																difficulty: recipe.difficulty as 'Easy' | 'Medium' | 'Hard',
+																image: recipe.image,
+																mealType: recipe.tags.meal,
+																protein: recipe.tags.meat,
+																country: recipe.tags.country,
+																ingredients: recipe.ingredients.join('\n'),
+																instructions: recipe.instructions.join('\n'),
+																tastes: recipe.tags.taste.join(', '),
+																ingredients_tags: recipe.tags.ingredient.join(', '),
+															})
+															setEditingSlug(recipe.slug)
+															setActiveTab('create')
+														}}
+														title='Edit recipe'
+														className='p-2 rounded-lg bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors'
+													>
+														<Edit className='w-5 h-5' />
+													</button>														{/* Delete */}
 														<button
 															onClick={() => handleDeleteRecipe(recipe.slug)}
 															disabled={deletingSlug === recipe.slug}
@@ -697,12 +707,12 @@ export const DashboardContent = () => {
 
 								{/* Submit Button */}
 								<button
-									type='submit'
-									disabled={loading}
-									className='w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors'
-								>
-									{loading ? 'Creating Recipe...' : 'Create Recipe'}
-								</button>
+								type='submit'
+								disabled={loading}
+								className='w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors'
+							>
+								{loading ? (editingSlug ? 'Updating Recipe...' : 'Creating Recipe...') : (editingSlug ? 'Update Recipe' : 'Create Recipe')}
+							</button>
 							</form>
 
 							<div className='mt-6 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-lg text-sm'>
