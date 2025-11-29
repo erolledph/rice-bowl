@@ -171,7 +171,7 @@ const RecipeDetail = () => {
 						className='p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-full shadow-lg transition-all hover:scale-110'
 						title='Download recipe as image'
 					>
-						<Download className={`w-6 h-6 ${downloading ? 'animate-spin' : ''}`} />
+						<Download className='w-6 h-6' />
 					</button>
 
 					{/* Print Button */}
@@ -209,7 +209,7 @@ const RecipeDetail = () => {
 						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent print:hidden'></div>
 					</div>					{/* Header */}
 					<div className='print-content mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
-						<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3'>
+						<h1 className='text-4xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-white mb-3 leading-tight'>
 							{recipe.name}
 						</h1>
 						<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4'>
@@ -267,12 +267,13 @@ const RecipeDetail = () => {
 							</ol>
 						</div>
 					</div>
+				</div>
 
-					{/* Social Share Section */}
-					<div className='social-share'>
-						<SocialShare
-							title={recipe.name}
-							description={recipe.description}
+				{/* Social Share Section */}
+				<div className='social-share'>
+					<SocialShare
+						title={recipe.name}
+						description={recipe.description}
 							url={recipeUrl}
 						/>
 					</div>
