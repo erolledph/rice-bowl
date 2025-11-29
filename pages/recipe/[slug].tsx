@@ -269,27 +269,28 @@ const RecipeDetail = () => {
 					</div>
 				</div>
 
-				{/* Social Share Section */}
-				<div className='social-share'>
-					<SocialShare
-						title={recipe.name}
-						description={recipe.description}
-							url={recipeUrl}
-						/>
-					</div>
-				</div>					{/* Back Button - Only at bottom */}
-					<div className='back-button mt-12 flex justify-center'>
-						<button
-							onClick={() => window.history.back()}
-							className='px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg'
-						>
-							← Back to Recipes
-						</button>
-					</div>
-				</Section>
-			</Page>
-		</>
-	)
+			{/* Social Share Section */}
+			<div className='social-share mt-12'>
+				<SocialShare
+					title={recipe.name}
+					description={recipe.description}
+					url={recipeUrl}
+				/>
+			</div>
+
+			{/* Back Button - Only at bottom */}
+			<div className='back-button mt-12 flex justify-center'>
+				<button
+					onClick={() => window.history.back()}
+					className='px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg'
+				>
+					← Back to Recipes
+				</button>
+			</div>
+		</Section>
+		</Page>
+	</>
+)
 }
 
 export default RecipeDetail
