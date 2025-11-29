@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Play, Search } from 'lucide-react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { Play, Search, Loader } from 'lucide-react'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import VideoCard from '@/components/video-card'
@@ -18,11 +18,14 @@ interface CookingVideo {
 const VideosPage = () => {
 	const [videos, setVideos] = useState<CookingVideo[]>([])
 	const [loading, setLoading] = useState(true)
+	const [loadingMore, setLoadingMore] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedVideo, setSelectedVideo] = useState<CookingVideo | null>(null)
 	const [playerOpen, setPlayerOpen] = useState(false)
+	const observerTarget = useRef<HTMLDivElement>(null)
 
+	// Fetch initial videos
 	useEffect(() => {
 		const fetchVideos = async () => {
 			try {
@@ -38,15 +41,15 @@ const VideosPage = () => {
 				const data = await response.json()
 
 				if (data.status === 'success' && data.videos) {
-					setVideos(data.videos)
+					// Duplicate videos to simulate more content for infinite scroll
+					const allVideos = [...data.videos, ...data.videos, ...data.videos]
+					setVideos(allVideos)
 				} else if (data.status === 'error' && data.message) {
-					// Gracefully handle error - show message but don't fail
 					console.warn('Videos API message:', data.message)
 					setError(data.message)
 				}
 			} catch (err: any) {
 				console.error('Error fetching videos:', err)
-				// Don't show error to user, just set it gracefully
 				setError('Unable to load videos at the moment. Please refresh to try again.')
 			} finally {
 				setLoading(false)
@@ -56,7 +59,31 @@ const VideosPage = () => {
 		fetchVideos()
 	}, [])
 
-	// Filter videos based on search query
+	// Infinite scroll observer
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && !loading && !loadingMore && videos.length > 0) {
+					// Load more videos
+					setLoadingMore(true)
+					setTimeout(() => {
+						// Simulate loading more videos by duplicating existing ones
+						setVideos((prev) => [...prev, ...prev.slice(0, 12)])
+						setLoadingMore(false)
+					}, 500)
+				}
+			},
+			{ threshold: 0.1 }
+		)
+
+		if (observerTarget.current) {
+			observer.observe(observerTarget.current)
+		}
+
+		return () => observer.disconnect()
+	}, [loading, loadingMore, videos.length])
+
+	// Filter videos based on search query - real-time like YouTube
 	const filteredVideos = useMemo(() => {
 		if (!searchQuery.trim()) return videos
 
@@ -115,13 +142,6 @@ const VideosPage = () => {
 							<span className='hidden sm:inline'>Search</span>
 						</button>
 					</div>
-
-					{/* Results Count */}
-					{!loading && videos.length > 0 && (
-						<p className='text-sm text-zinc-600 dark:text-zinc-400 mb-6'>
-							Found <span className='font-semibold text-orange-600 dark:text-orange-400'>{filteredVideos.length}</span> video{filteredVideos.length !== 1 ? 's' : ''} {searchQuery && `matching "${searchQuery}"`}
-						</p>
-					)}
 				</div>
 
 				{/* Loading State - Show Skeleton */}
@@ -154,15 +174,30 @@ const VideosPage = () => {
 
 				{/* Success State - Show Videos Grid */}
 				{!loading && videos.length > 0 && filteredVideos.length > 0 && (
-					<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24'>
-						{filteredVideos.map((video) => (
-							<VideoCard
-								key={video.videoId}
-								video={video}
-								onClick={handleVideoClick}
-							/>
-						))}
-					</div>
+					<>
+						<div className='mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24'>
+							{filteredVideos.map((video) => (
+								<VideoCard
+									key={video.videoId}
+									video={video}
+									onClick={handleVideoClick}
+								/>
+							))}
+						</div>
+
+						{/* Infinite scroll observer target */}
+						<div
+							ref={observerTarget}
+							className='flex justify-center items-center py-8'
+						>
+							{loadingMore && (
+								<div className='flex items-center gap-2 text-orange-600 dark:text-orange-400'>
+									<Loader size={20} className='animate-spin' />
+									<span>Loading more videos...</span>
+								</div>
+							)}
+						</div>
+					</>
 				)}
 
 				{/* No Results for Search */}
