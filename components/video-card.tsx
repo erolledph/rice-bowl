@@ -1,7 +1,8 @@
+// components/VideoCard.tsx
 import React from 'react'
 import { Maximize2 } from 'lucide-react'
+import Image from 'next/image'
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
-import Image from 'next/image' // <-- fixes the <img> warning too
 
 interface CookingVideo {
   videoId: string
@@ -21,12 +22,12 @@ export default function VideoCard({ video }: VideoCardProps) {
   const isPlaying = playingVideoId === video.videoId
 
   const handlePlay = () => setPlayingVideoId(video.videoId)
+
   const handleStop = (e: React.MouseEvent) => {
     e.stopPropagation()
     setPlayingVideoId(null)
   }
 
-  // Properly typed fullscreen with Safari/iOS support
   const handleFullscreen = (e: React.MouseEvent) => {
     e.stopPropagation()
     const iframe = document.querySelector(
@@ -35,39 +36,39 @@ export default function VideoCard({ video }: VideoCardProps) {
 
     if (!iframe) return
 
-    const requestFs = 
+    const requestFs =
       iframe.requestFullscreen ||
-      // @ts-ignore - Safari still uses webkit prefix in 2025
-      iframe.webkitRequestFullscreen ||
-      // @ts-ignore - very old Android
+      // Safari iOS/macOS
+      (iframe as any).webkitRequestFullscreen ||
+      // Old Firefox
       (iframe as any).mozRequestFullScreen ||
+      // Old IE/Edge
       (iframe as any).msRequestFullscreen
 
-    if (requestFs) {
-      requestFs.call(iframe)
-    }
+    requestFs?.call(iframe)
   }
 
   return (
-    <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
-      {/* Thumbnail / Player */}
+    <div className="group relative rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow">
+      {/* Thumbnail or Player */}
       <div className="relative w-full bg-black">
         {!isPlaying ? (
           <>
-            {/* Optimized Next.js Image */}
             <Image
               src={video.thumbnailUrl}
               alt={video.title}
               width={480}
               height={270}
               className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
-              unoptimized // YouTube thumbnails are already optimized
+              unoptimized // YouTube thumbnails are already compressed
+              priority={false}
             />
 
-            {/* Play Overlay */}
+            {/* Big Play Button Overlay */}
             <button
               onClick={handlePlay}
               className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors"
+              aria-label="Play video"
             >
               <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
                 <svg className="w-8 h-8 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
@@ -77,7 +78,7 @@ export default function VideoCard({ video }: VideoCardProps) {
             </button>
           </>
         ) : (
-          /* ──────── Super Clean YouTube Embed (2025) ──────── */
+          /* CLEAN YOUTUBE PLAYER – NO TITLE BAR EVER */
           <div className="youtube-clean">
             <iframe
               data-videoid={video.videoId}
@@ -91,20 +92,21 @@ export default function VideoCard({ video }: VideoCardProps) {
         )}
       </div>
 
-      {/* Title */}
+      {/* Title below */}
       <div className="p-4">
         <h3 className="font-bold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
           {video.title}
         </h3>
       </div>
 
-      {/* Floating Controls */}
+      {/* Floating controls when playing */}
       {isPlaying && (
         <div className="absolute top-3 right-3 flex gap-2 z-10">
           <button
             onClick={handleFullscreen}
             className="p-2.5 bg-black/70 hover:bg-black/90 text-white rounded-lg backdrop-blur-sm transition-all"
             title="Fullscreen"
+            aria-label="Fullscreen"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
