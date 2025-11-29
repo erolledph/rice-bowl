@@ -93,25 +93,34 @@ const VideosPage = () => {
 					const startIdx = (nextPage - 1) * VIDEOS_PER_PAGE
 					const endIdx = startIdx + VIDEOS_PER_PAGE
 
+					// Only load if there are more videos to show
 					if (startIdx < filteredVideos.length) {
 						setLoadingMore(true)
-						// Simulate network delay
+						// Simulate network delay for smooth UX
 						setTimeout(() => {
-							setDisplayedVideos((prev) => [...prev, ...filteredVideos.slice(startIdx, endIdx)])
+							const newVideos = filteredVideos.slice(startIdx, endIdx)
+							setDisplayedVideos((prev) => [...prev, ...newVideos])
 							setPage(nextPage)
 							setLoadingMore(false)
 						}, 300)
 					}
 				}
 			},
-			{ threshold: 0.1 }
+			{ 
+				threshold: 0.1,
+				rootMargin: '200px' // Load videos before user reaches bottom
+			}
 		)
 
 		if (observerTarget.current) {
 			observer.observe(observerTarget.current)
 		}
 
-		return () => observer.disconnect()
+		return () => {
+			if (observerTarget.current) {
+				observer.unobserve(observerTarget.current)
+			}
+		}
 	}, [page, loading, loadingMore, filteredVideos])
 
 	const handleVideoClick = (video: CookingVideo) => {
@@ -133,6 +142,16 @@ const VideosPage = () => {
 		window.location.reload()
 	}
 
+	const handleSearchSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		// Search query is already being updated on input change
+		// This just handles form submission for UX
+	}
+
+	const handleClearSearch = () => {
+		setSearchQuery('')
+	}
+
 	return (
 		<Page>
 			<Section>
@@ -145,22 +164,42 @@ const VideosPage = () => {
 						Discover amazing cooking tutorials and recipes from professional chefs
 					</p>
 
-					{/* Search Bar */}
-					<div className='flex gap-3 items-end mb-8'>
+					{/* Search Info */}
+					{allVideos.length > 0 && (
+						<p className='text-sm text-zinc-500 dark:text-zinc-400 mb-4'>
+							Showing results for: <span className='font-medium text-zinc-700 dark:text-zinc-300'>"{searchQuery || 'all videos'}"</span>
+						</p>
+					)}
+
+					{/* Search Bar - Form with Submit */}
+					<form onSubmit={handleSearchSubmit} className='flex gap-3 items-center mb-8'>
 						<div className='flex-1'>
 							<input
 								type='text'
-								placeholder='Search cooking videos...'
+								placeholder='Search cooking videos, recipes, tutorials...'
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className='w-full px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 transition-all'
 							/>
 						</div>
-						<button className='px-4 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2'>
+						<button 
+							type='submit'
+							className='px-4 py-3 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+							disabled={loading}
+						>
 							<Search size={20} />
 							<span className='hidden sm:inline'>Search</span>
 						</button>
-					</div>
+						{searchQuery && (
+							<button
+								type='button'
+								onClick={handleClearSearch}
+								className='px-3 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium'
+							>
+								Clear
+							</button>
+						)}
+					</form>
 				</div>
 
 				{/* Loading State - Show Skeleton */}
@@ -207,15 +246,30 @@ const VideosPage = () => {
 						{/* Infinite scroll observer target */}
 						<div
 							ref={observerTarget}
-							className='flex justify-center items-center py-8'
+							className='flex justify-center items-center py-12'
 						>
-							{loadingMore && (
-								<div className='flex items-center gap-2 text-orange-600 dark:text-orange-400'>
-									<Loader size={20} className='animate-spin' />
-									<span>Loading more videos...</span>
+							{loadingMore ? (
+								<div className='flex items-center gap-3'>
+									<Loader size={24} className='animate-spin text-orange-600 dark:text-orange-400' />
+									<span className='text-zinc-600 dark:text-zinc-400 font-medium'>Loading more videos...</span>
 								</div>
+							) : (
+								displayedVideos.length < filteredVideos.length && (
+									<p className='text-zinc-500 dark:text-zinc-500 text-sm'>
+										Scroll down to load more videos
+									</p>
+								)
 							)}
 						</div>
+
+						{/* End of Results Message */}
+						{displayedVideos.length >= filteredVideos.length && filteredVideos.length > VIDEOS_PER_PAGE && (
+							<div className='text-center py-8'>
+								<p className='text-zinc-500 dark:text-zinc-500 text-sm font-medium'>
+									✓ All {filteredVideos.length} videos loaded
+								</p>
+							</div>
+						)}
 					</>
 				)}
 
@@ -227,13 +281,13 @@ const VideosPage = () => {
 							No videos found
 						</p>
 						<p className='text-zinc-500 dark:text-zinc-500 mb-6'>
-							Try adjusting your search keywords
+							Try adjusting your search keywords. Search by title, channel, or description.
 						</p>
 						<button
-							onClick={() => setSearchQuery('')}
-							className='px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold text-sm transition-colors'
+							onClick={handleClearSearch}
+							className='px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold text-sm transition-colors'
 						>
-							Clear Search
+							Clear Search & View All
 						</button>
 					</div>
 				)}
@@ -254,6 +308,25 @@ const VideosPage = () => {
 						>
 							Refresh Videos
 						</button>
+					</div>
+				)}
+
+				{/* Loading More Indicator */}
+				{!loading && displayedVideos.length > 0 && displayedVideos.length < filteredVideos.length && (
+					<div ref={observerTarget} className='flex justify-center items-center py-12'>
+						<div className='flex items-center gap-3'>
+							<Loader size={24} className='animate-spin text-orange-600 dark:text-orange-400' />
+							<span className='text-zinc-600 dark:text-zinc-400 font-medium'>Loading more videos...</span>
+						</div>
+					</div>
+				)}
+
+				{/* End of Results Indicator */}
+				{!loading && displayedVideos.length > 0 && displayedVideos.length >= filteredVideos.length && filteredVideos.length > VIDEOS_PER_PAGE && (
+					<div className='text-center py-8 mt-4'>
+						<p className='text-zinc-500 dark:text-zinc-500 font-medium'>
+							✓ No more videos to load
+						</p>
 					</div>
 				)}
 
