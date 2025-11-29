@@ -224,24 +224,26 @@ const handleDeleteRecipe = async (slug: string) => {
 	}
 
 	setDeletingSlug(slug)
-	setMessage('')		try {
-			if (gitHubOwner && gitHubRepo && gitHubToken) {
-				await deleteRecipePost(slug, gitHubOwner, gitHubRepo, gitHubToken)
-				setMessage(`✅ Recipe deleted from GitHub`)
-				setMessageType('success')
-			} else {
-				setMessage('⚠️ GitHub credentials not configured. Cannot delete recipe.')
-				setMessageType('error')
-			}
-		} catch (error) {
-			setMessage('Error deleting recipe: ' + (error instanceof Error ? error.message : 'Unknown error'))
-			setMessageType('error')
-		} finally {
-			setDeletingSlug(null)
-		}
-	}
+	setMessage('')
 
-	const copyRecipeLink = (slug: string) => {
+	try {
+		if (gitHubOwner && gitHubRepo && gitHubToken) {
+			await deleteRecipePost(slug, gitHubOwner, gitHubRepo, gitHubToken)
+			setMessage(`✅ Recipe deleted from GitHub`)
+			setMessageType('success')
+		} else {
+			setMessage('⚠️ GitHub credentials not configured. Cannot delete recipe.')
+			setMessageType('error')
+		}
+	} catch (error) {
+		setMessage('Error deleting recipe: ' + (error instanceof Error ? error.message : 'Unknown error'))
+		setMessageType('error')
+	} finally {
+		setDeletingSlug(null)
+	}
+}
+
+const copyRecipeLink = (slug: string) => {
 		const link = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/recipe/${slug}`
 		navigator.clipboard.writeText(link)
 		setMessage('📋 Recipe link copied to clipboard!')
