@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Heart } from 'lucide-react'
+import VideosDropdown from './videos-dropdown'
 
 const links = [
 	{ label: 'Recipes', href: '/recipes' },
@@ -35,7 +36,12 @@ const Appbar = () => {
 										{label}
 									</Link>
 								))}
+								<VideosDropdown />
 							</div>
+						</div>
+						{/* Mobile videos button */}
+						<div className='sm:hidden'>
+							<VideosDropdown />
 						</div>
 					</nav>
 				</div>
