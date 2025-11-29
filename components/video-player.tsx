@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
+import { useHideYouTubeUI } from '@/hooks/useHideYouTubeUI'
 
 interface CookingVideo {
 	videoId: string
@@ -44,6 +45,9 @@ export default function VideoPlayer({ video, isOpen, onClose }: VideoPlayerProps
 			document.body.appendChild(script)
 		}
 	}, [])
+
+	// Use hook to hide YouTube UI
+	useHideYouTubeUI(video?.videoId || '')
 
 	if (!isOpen || !video) return null
 
