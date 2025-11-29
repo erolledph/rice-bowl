@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { Maximize2 } from 'lucide-react'
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext'
 
@@ -16,26 +16,9 @@ interface VideoCardProps {
 	onClick: (video: CookingVideo) => void
 }
 
-declare global {
-	interface Window {
-		YT: any
-		onYouTubeIframeAPIReady: () => void
-	}
-}
-
 export default function VideoCard({ video, onClick }: VideoCardProps) {
 	const { playingVideoId, setPlayingVideoId } = useVideoPlayer()
 	const isPlaying = playingVideoId === video.videoId
-	const playerRef = useRef<any>(null)
-
-	useEffect(() => {
-		// Load YouTube IFrame API
-		if (!window.YT) {
-			const script = document.createElement('script')
-			script.src = 'https://www.youtube.com/iframe_api'
-			document.body.appendChild(script)
-		}
-	}, [])
 
 	const handleClick = () => {
 		setPlayingVideoId(video.videoId)
@@ -43,14 +26,11 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 
 	const handleStop = () => {
 		setPlayingVideoId(null)
-		if (playerRef.current) {
-			playerRef.current.stopVideo()
-		}
 	}
 
 	const handleFullscreen = (e: React.MouseEvent) => {
 		e.stopPropagation()
-		const container = document.querySelector(`.youtube-player-${video.videoId}`) as HTMLElement
+		const container = document.querySelector('.youtube-container-hidden-details') as HTMLElement
 		if (container) {
 			if (document.fullscreenElement) {
 				document.exitFullscreen()
@@ -92,21 +72,19 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 						</div>
 					</>
 				) : (
-					<div className={`relative w-full h-full youtube-player-${video.videoId}`}>
+					<div className='relative w-full h-full'>
 						<div className='youtube-container-hidden-details'>
 							<iframe
-								id={`youtube-player-${video.videoId}`}
-								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1&fs=0&iv_load_policy=3`}
+								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&color=white&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1`}
 								title={video.title}
 								frameBorder='0'
 								allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
 								allowFullScreen
-								style={{ pointerEvents: 'none' }}
 							/>
 						</div>
 
 						{/* Control Buttons */}
-						<div className='absolute top-2 right-2 flex gap-2 pointer-events-auto z-10'>
+						<div className='absolute top-2 right-2 flex gap-2'>
 							{/* Fullscreen Button */}
 							<button
 								onClick={handleFullscreen}
