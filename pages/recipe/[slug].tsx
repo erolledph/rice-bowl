@@ -134,8 +134,12 @@ const RecipeDetail = () => {
 				{/* Basic Meta Tags */}
 				<title>{recipe.name} | Rice Bowl - Recipe</title>
 				<meta name='description' content={recipe.description} />
-				<meta name='keywords' content={`${recipe.tags.ingredient.join(', ')}, ${recipe.name}, recipe`} />
-				<meta name='viewport' content='width=device-width, initial-scale=1' />
+				<meta name='keywords' content={`${recipe.tags.ingredient.join(', ')}, ${recipe.name}, recipe, ${recipe.tags.country}, ${recipe.tags.meal}`} />
+				<meta name='author' content='Rice Bowl Team' />
+				<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+				{/* Canonical URL */}
+				<link rel='canonical' href={recipeUrl} />
 
 				{/* Open Graph Tags */}
 				<meta property='og:title' content={recipe.name} />
@@ -143,20 +147,56 @@ const RecipeDetail = () => {
 				<meta property='og:image' content={recipe.image} />
 				<meta property='og:url' content={recipeUrl} />
 				<meta property='og:type' content='website' />
+				<meta property='og:site_name' content='Rice Bowl' />
 
 				{/* Twitter Card Tags */}
 				<meta name='twitter:card' content='summary_large_image' />
 				<meta name='twitter:title' content={recipe.name} />
 				<meta name='twitter:description' content={recipe.description} />
 				<meta name='twitter:image' content={recipe.image} />
+				<meta name='twitter:creator' content='@ricebowlrecipes' />
 
-				{/* Canonical URL */}
-				<link rel='canonical' href={recipeUrl} />
+				{/* Article Metadata */}
+				<meta property='article:published_time' content={new Date().toISOString()} />
+				<meta property='article:author' content='Rice Bowl Team' />
+				<meta property='article:section' content={recipe.tags.meal} />
+				<meta property='article:tag' content={recipe.tags.country} />
 
-				{/* Schema Markup */}
+				{/* Schema Markup - Recipe */}
 				<script
 					type='application/ld+json'
 					dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+				/>
+
+				{/* Breadcrumb Schema */}
+				<script
+					type='application/ld+json'
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify({
+							'@context': 'https://schema.org',
+							'@type': 'BreadcrumbList',
+							'itemListElement': [
+								{
+									'@type': 'ListItem',
+									'position': 1,
+									'name': 'Home',
+									'item': baseUrl,
+								},
+								{
+									'@type': 'ListItem',
+									'position': 2,
+									'name': 'Recipes',
+									'item': `${baseUrl}/recipes`,
+								},
+								{
+									'@type': 'ListItem',
+									'position': 3,
+									'name': recipe.name,
+									'item': recipeUrl,
+								},
+							],
+						}),
+					}}
 				/>
 			</Head>
 
@@ -170,6 +210,7 @@ const RecipeDetail = () => {
 						disabled={downloading}
 						className='p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-full shadow-lg transition-all hover:scale-110'
 						title='Download recipe as image'
+						aria-label='Download recipe'
 					>
 						<Download className='w-6 h-6' />
 					</button>
@@ -179,6 +220,7 @@ const RecipeDetail = () => {
 						onClick={() => window.print()}
 						className='p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-all hover:scale-110'
 						title='Print this recipe'
+						aria-label='Print recipe'
 					>
 						<Printer className='w-6 h-6' />
 					</button>
@@ -192,11 +234,14 @@ const RecipeDetail = () => {
 								: 'bg-zinc-300 hover:bg-zinc-400 text-zinc-900'
 						}`}
 						title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+						aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
 					>
 						<Heart className='w-6 h-6' fill={isFav ? 'currentColor' : 'none'} />
 					</button>
-				</div>				{/* Content wrapper for download */}
-				<div ref={contentRef} className='bg-white dark:bg-zinc-900'>
+				</div>
+
+				{/* Content wrapper for download - Semantic HTML */}
+				<article ref={contentRef} className='bg-white dark:bg-zinc-900'>
 					{/* Hero Image */}
 					<div className='print-content relative h-96 w-full mb-8 rounded-2xl overflow-hidden shadow-2xl'>
 						<Image
@@ -205,17 +250,31 @@ const RecipeDetail = () => {
 							fill
 							className='object-cover'
 							priority
+							sizes='(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 75vw'
 						/>
 						<div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent print:hidden'></div>
-					</div>					{/* Header */}
-					<div className='print-content mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
+					</div>
+
+					{/* Header */}
+					<header className='print-content mb-8 pb-6 border-b-2 border-orange-200 dark:border-orange-900'>
 						<h1 className='text-4xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-white mb-3 leading-tight'>
 							{recipe.name}
 						</h1>
 						<p className='text-xl text-zinc-600 dark:text-zinc-400 mb-4'>
 							{recipe.description}
 						</p>
-					</div>
+						<div className='flex flex-wrap gap-2'>
+							<span className='px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 rounded-full text-sm'>
+								{recipe.tags.country}
+							</span>
+							<span className='px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 rounded-full text-sm'>
+								{recipe.tags.meal}
+							</span>
+							<span className='px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-900 dark:text-orange-100 rounded-full text-sm'>
+								{recipe.difficulty}
+							</span>
+						</div>
+					</header>
 
 					{/* Recipe Info Tabs */}
 					<RecipeInfoTabs
@@ -227,7 +286,7 @@ const RecipeDetail = () => {
 					/>
 
 					{/* Ingredients Section */}
-					<div className='print-content mb-8'>
+					<section className='print-content mb-8'>
 						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-4'>
 							Ingredients
 						</h2>
@@ -237,6 +296,7 @@ const RecipeDetail = () => {
 									<li
 										key={index}
 										className='flex items-start text-zinc-800 dark:text-zinc-200'
+										itemProp='recipeIngredient'
 									>
 										<span className='mr-3 text-orange-500 font-bold'>•</span>
 										<span>{ingredient}</span>
@@ -244,10 +304,10 @@ const RecipeDetail = () => {
 								))}
 							</ul>
 						</div>
-					</div>
+					</section>
 
 					{/* Instructions Section */}
-					<div className='print-content mb-12'>
+					<section className='print-content mb-12'>
 						<h2 className='text-2xl font-bold text-zinc-900 dark:text-white mb-4'>
 							Instructions
 						</h2>
@@ -257,17 +317,20 @@ const RecipeDetail = () => {
 									<li
 										key={index}
 										className='flex items-start text-zinc-800 dark:text-zinc-200'
+										itemProp='recipeInstructions'
+										itemScope
+										itemType='https://schema.org/HowToStep'
 									>
 										<span className='mr-3 w-6 h-6 flex items-center justify-center bg-orange-500 text-white font-bold text-sm rounded-full flex-shrink-0'>
 											{index + 1}
 										</span>
-										<span className='pt-0.5'>{instruction}</span>
+										<span className='pt-0.5' itemProp='text'>{instruction}</span>
 									</li>
 								))}
 							</ol>
 						</div>
-					</div>
-				</div>
+					</section>
+				</article>
 
 			{/* Social Share Section */}
 			<div className='social-share mt-12'>
@@ -283,6 +346,7 @@ const RecipeDetail = () => {
 				<button
 					onClick={() => window.history.back()}
 					className='px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg transition-all shadow-lg'
+					aria-label='Go back to previous page'
 				>
 					← Back to Recipes
 				</button>
@@ -292,5 +356,4 @@ const RecipeDetail = () => {
 	</>
 )
 }
-
 export default RecipeDetail

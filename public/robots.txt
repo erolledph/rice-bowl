@@ -1,0 +1,42 @@
+# Rice Bowl Recipe Website Robots Configuration
+# Generated for SEO optimization
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /public/
+Allow: /public/images/
+Allow: /public/manifest.json
+Allow: /public/sw.js
+
+# Crawl delay settings
+Crawl-delay: 1
+
+# Specific rules for Googlebot
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Crawl-delay: 0
+
+# Specific rules for Bingbot
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://rice-bowl.vercel.app/sitemap.xml
