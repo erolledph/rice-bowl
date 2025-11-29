@@ -15,10 +15,15 @@ interface VideoCardProps {
 }
 
 export default function VideoCard({ video, onClick }: VideoCardProps) {
+	const handleClick = () => {
+		// Direct play - open YouTube video in new tab
+		window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank')
+	}
+
 	return (
 		<div
 			className='rounded-xl overflow-hidden bg-white dark:bg-zinc-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group'
-			onClick={() => onClick(video)}
+			onClick={handleClick}
 		>
 			{/* Thumbnail */}
 			<div className='relative w-full h-48 overflow-hidden bg-zinc-200 dark:bg-zinc-700'>
@@ -40,28 +45,13 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 						</svg>
 					</div>
 				</div>
-
-				{/* YouTube Badge */}
-				<div className='absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded font-semibold'>
-					YouTube
-				</div>
 			</div>
 
-			{/* Content */}
+			{/* Content - Only Title */}
 			<div className='p-4'>
 				<h3 className='font-bold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors'>
 					{video.title}
 				</h3>
-
-				<p className='text-xs text-zinc-600 dark:text-zinc-400 mt-2'>{video.channelTitle}</p>
-
-				<p className='text-xs text-zinc-500 dark:text-zinc-500 mt-1'>
-					{new Date(video.publishedAt).toLocaleDateString()}
-				</p>
-
-				<p className='text-xs text-zinc-600 dark:text-zinc-400 mt-3 line-clamp-2 leading-relaxed'>
-					{video.description}
-				</p>
 			</div>
 		</div>
 	)

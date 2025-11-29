@@ -3,7 +3,6 @@ import { Play, Search, Loader } from 'lucide-react'
 import Page from '@/components/page'
 import Section from '@/components/section'
 import VideoCard from '@/components/video-card'
-import VideoPlayer from '@/components/video-player'
 import VideosSkeleton from '@/components/videos-skeleton'
 
 interface CookingVideo {
@@ -31,8 +30,6 @@ const VideosPage = () => {
 	const [searchQuery, setSearchQuery] = useState('cooking recipes')
 	const [currentSearchQuery, setCurrentSearchQuery] = useState('cooking recipes')
 	const [nextPageToken, setNextPageToken] = useState<string | null>(null)
-	const [selectedVideo, setSelectedVideo] = useState<CookingVideo | null>(null)
-	const [playerOpen, setPlayerOpen] = useState(false)
 	const [page, setPage] = useState(1)
 	const observerTarget = useRef<HTMLDivElement>(null)
 	const VIDEOS_PER_PAGE = 12
@@ -141,16 +138,6 @@ const VideosPage = () => {
 		}
 	}, [loading, loadingMore, nextPageToken, currentSearchQuery, searchVideos])
 
-	const handleVideoClick = (video: CookingVideo) => {
-		setSelectedVideo(video)
-		setPlayerOpen(true)
-	}
-
-	const handleClosePlayer = () => {
-		setPlayerOpen(false)
-		setTimeout(() => setSelectedVideo(null), 300)
-	}
-
 	const handleRefresh = () => {
 		setLoading(true)
 		setError(null)
@@ -246,7 +233,7 @@ const VideosPage = () => {
 								<VideoCard
 									key={`${video.videoId}-${Math.random()}`}
 									video={video}
-									onClick={handleVideoClick}
+									onClick={() => {}}
 								/>
 							))}
 						</div>
@@ -296,9 +283,6 @@ const VideosPage = () => {
 						</button>
 					</div>
 				)}
-
-				{/* Video Player Modal */}
-				<VideoPlayer video={selectedVideo} isOpen={playerOpen} onClose={handleClosePlayer} />
 			</Section>
 		</Page>
 	)
