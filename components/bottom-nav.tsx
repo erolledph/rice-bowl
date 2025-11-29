@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Home, Heart, BookOpen } from 'lucide-react'
+import { Home, Heart, BookOpen, Play } from 'lucide-react'
 
 const BottomNav = () => {
 	const router = useRouter()
@@ -48,5 +48,10 @@ const links = [
 		label: 'Recipes',
 		href: '/recipes',
 		icon: <BookOpen size={18} />,
+	},
+	{
+		label: 'Videos',
+		href: '/videos',
+		icon: <Play size={18} />,
 	},
 ]
