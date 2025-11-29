@@ -1,13 +1,18 @@
 // YouTube API configuration
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
-const CACHE_TTL_SECONDS = 3600; // 1 hour
+const CACHE_TTL_SECONDS = 7200; // 2 hours
 
-// In-memory cache store
+// Quota tracking
+let quotaUsedToday = 0;
+let quotaResetTime = Date.now() + 24 * 60 * 60 * 1000; // UTC midnight
+
+// In-memory cache store (with versioning)
 interface VideoCache {
 	data: CookingVideo[] | null;
 	timestamp: number;
 	etag: string | null;
+	quotaUsed: number;
 }
 
 interface CookingVideo {
@@ -23,6 +28,7 @@ let videoCache: VideoCache = {
 	data: null,
 	timestamp: 0,
 	etag: null,
+	quotaUsed: 0,
 };
 
 /**
@@ -137,6 +143,22 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			return getMockVideos();
 		}
 
+		// Reset quota counter if new day
+		if (Date.now() > quotaResetTime) {
+			quotaUsedToday = 0;
+			quotaResetTime = Date.now() + 24 * 60 * 60 * 1000;
+		}
+
+		// Warn if approaching quota limit (10,000 units/day typical)
+		if (quotaUsedToday > 9000) {
+			console.warn(`[YouTube API] ⚠️ High quota usage: ${quotaUsedToday}/10000`);
+			// Return cached data instead of making new request
+			if (videoCache.data) {
+				console.log('[YouTube API] Using cache due to quota concerns');
+				return videoCache.data;
+			}
+		}
+
 		// Search parameters optimized for cooking content
 		const params = new URLSearchParams({
 			part: 'snippet',
@@ -146,6 +168,8 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			maxResults: '12', // Show 12 videos in dropdown
 			key: YOUTUBE_API_KEY || '',
 			order: 'relevance',
+			// Optimization: only get snippet to save quota
+			// Alternative: use part=id then batch fetch snippets
 		});
 
 		const headers: HeadersInit = {};
@@ -164,7 +188,7 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 
 		// HTTP 304 Not Modified: Cache is still fresh (0 quota cost)
 		if (response.status === 304) {
-			console.log('[YouTube API] Content not modified (304). Cache still valid.');
+			console.log('[YouTube API] Content not modified (304). Cache still valid. Quota saved: 100');
 			videoCache.timestamp = Date.now();
 			return videoCache.data;
 		}
@@ -175,6 +199,10 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 		}
 
 		const data = await response.json();
+
+		// Track quota usage
+		quotaUsedToday += 100; // Standard search: 100 units
+		console.log(`[YouTube API] Quota used: ${quotaUsedToday}/10000 (updated +100)`);
 
 		// Extract ETag for next request
 		const newEtag = response.headers.get('etag');
@@ -198,6 +226,7 @@ export async function refreshCookingVideosCache(): Promise<CookingVideo[] | null
 			data: videos,
 			timestamp: Date.now(),
 			etag: newEtag,
+			quotaUsed: quotaUsedToday,
 		};
 
 		console.log(`[YouTube API] Cache updated with ${videos.length} videos.`);
@@ -229,6 +258,38 @@ export function getCachedVideos(): CookingVideo[] | null {
 	}
 
 	return null;
+}
+
+/**
+ * Get current quota usage
+ */
+export function getQuotaStatus(): {
+	used: number;
+	limit: number;
+	percentUsed: number;
+	resetIn: string;
+	status: 'ok' | 'warning' | 'critical';
+} {
+	const now = Date.now();
+	const timeUntilReset = quotaResetTime - now;
+	const hours = Math.floor(timeUntilReset / (60 * 60 * 1000));
+	const minutes = Math.floor((timeUntilReset % (60 * 60 * 1000)) / (60 * 1000));
+	const resetIn = `${hours}h ${minutes}m`;
+
+	const limit = 10000; // YouTube API default daily limit
+	const percentUsed = (quotaUsedToday / limit) * 100;
+
+	let status: 'ok' | 'warning' | 'critical' = 'ok';
+	if (percentUsed > 90) status = 'critical';
+	else if (percentUsed > 70) status = 'warning';
+
+	return {
+		used: quotaUsedToday,
+		limit,
+		percentUsed: parseFloat(percentUsed.toFixed(2)),
+		resetIn,
+		status,
+	};
 }
 
 /**

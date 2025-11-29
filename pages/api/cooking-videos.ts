@@ -2,16 +2,18 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import {
 	refreshCookingVideosCache,
 	getCachedVideos,
+	getQuotaStatus,
 } from '../../lib/youtube-api';
 
 interface ApiResponse {
 	status: 'success' | 'error';
 	source?: 'cache' | 'fresh' | 'stale-cache';
 	videos?: any[];
+	quotaStatus?: ReturnType<typeof getQuotaStatus>;
 	message?: string;
 }
 
-const CACHE_TTL_SECONDS = 3600; // 1 hour
+const CACHE_TTL_SECONDS = 7200; // 2 hours
 let lastRefreshTime = 0;
 
 export default async function handler(
@@ -29,6 +31,10 @@ export default async function handler(
 	}
 
 	try {
+		// Set cache headers for CDN
+		res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+		res.setHeader('Content-Type', 'application/json');
+
 		// Check if we should refresh the cache
 		const now = Date.now();
 		const shouldRefresh = now - lastRefreshTime > CACHE_TTL_SECONDS * 1000;
@@ -48,6 +54,7 @@ export default async function handler(
 				return res.status(500).json({
 					status: 'error',
 					message: 'Failed to fetch cooking videos.',
+					quotaStatus: getQuotaStatus(),
 				});
 			}
 
@@ -55,6 +62,7 @@ export default async function handler(
 				status: 'success',
 				source: 'fresh',
 				videos,
+				quotaStatus: getQuotaStatus(),
 			});
 		}
 
@@ -63,6 +71,7 @@ export default async function handler(
 			status: 'success',
 			source: 'cache',
 			videos,
+			quotaStatus: getQuotaStatus(),
 		});
 	} catch (error: any) {
 		console.error('[API] Error:', error);
@@ -70,6 +79,7 @@ export default async function handler(
 		return res.status(500).json({
 			status: 'error',
 			message: `Failed to fetch cooking videos: ${error.message}`,
+			quotaStatus: getQuotaStatus(),
 		});
 	}
 }

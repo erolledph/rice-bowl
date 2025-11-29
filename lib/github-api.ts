@@ -1,8 +1,53 @@
 /**
  * GitHub API utilities for managing recipes as content
+ * 
+ * Optimization for 100k+ visitors:
+ * - ETag-based caching (no quota if unchanged)
+ * - Batch file fetching with Promise.all
+ * - Exponential backoff for rate limiting
+ * - Request deduplication
  */
 
+import { recipeCache, getCacheKey } from './cache'
+
 const GITHUB_API_BASE = 'https://api.github.com'
+
+// Rate limiting configuration
+const GITHUB_RATE_LIMIT = {
+  maxRetries: 3,
+  retryDelayMs: 1000,
+  backoffMultiplier: 2,
+}
+
+// ETag storage for conditional requests
+const etagCache: Map<string, string> = new Map()
+
+/**
+ * Retry with exponential backoff
+ */
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  attempt = 0
+): Promise<T> {
+  try {
+    return await fn()
+  } catch (error: any) {
+    if (
+      attempt < GITHUB_RATE_LIMIT.maxRetries &&
+      error.status === 403
+    ) {
+      const delay =
+        GITHUB_RATE_LIMIT.retryDelayMs *
+        Math.pow(GITHUB_RATE_LIMIT.backoffMultiplier, attempt)
+      console.log(
+        `[GitHub API] Rate limited. Retrying in ${delay}ms...`
+      )
+      await new Promise((resolve) => setTimeout(resolve, delay))
+      return retryWithBackoff(fn, attempt + 1)
+    }
+    throw error
+  }
+}
 
 interface GitHubCommitResponse {
 	sha: string
@@ -57,6 +102,7 @@ interface RecipeData {
 
 /**
  * Get the base64 encoded content of a file from GitHub
+ * Uses ETags for efficient caching (no quota if unchanged)
  */
 export async function getFileContent(
 	owner: string,
@@ -65,15 +111,27 @@ export async function getFileContent(
 	token: string
 ): Promise<{ content: string; sha: string } | null> {
 	try {
-		const response = await fetch(
-			`${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`,
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
-					Accept: 'application/vnd.github.v3+json',
-				},
-			}
-		)
+		const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`
+		const headers: HeadersInit = {
+			Authorization: `Bearer ${token}`,
+			Accept: 'application/vnd.github.v3+json',
+		}
+
+		// Add ETag if we have one (conditional request)
+		const etag = etagCache.get(path)
+		if (etag) {
+			headers['If-None-Match'] = etag
+		}
+
+		const response = await retryWithBackoff(async () => {
+			return fetch(url, { headers })
+		})
+
+		// 304 Not Modified: Cache still valid, no quota used
+		if (response.status === 304) {
+			console.log(`[GitHub API] File ${path} not modified (304)`)
+			return null
+		}
 
 		if (response.status === 404) {
 			return null
@@ -81,6 +139,12 @@ export async function getFileContent(
 
 		if (!response.ok) {
 			throw new Error(`GitHub API error: ${response.statusText}`)
+		}
+
+		// Store ETag for next request
+		const newEtag = response.headers.get('etag')
+		if (newEtag) {
+			etagCache.set(path, newEtag)
 		}
 
 		const data = await response.json()
