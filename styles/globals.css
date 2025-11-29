@@ -137,3 +137,7 @@ body {
 	width: 300%;
 	height: 100%;
 }
+
+.ytp-title {
+    display: none !important;
+}
