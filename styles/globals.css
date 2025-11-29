@@ -138,6 +138,30 @@ body {
 	height: 100%;
 }
 
-.ytp-title {
-    display: none !important;
+..youtube-container-hidden-details {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  line-height: 0;
+}
+
+.youtube-container-hidden-details iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none; /* optional: disable interaction */
+}
+
+/* Extra safety: hide any remaining title elements */
+.ytp-title,
+.ytp-title-text,
+.ytp-title-channel,
+.ytp-chrome-top,
+.ytp-show-cards-title {
+  display: none !important;
 }
