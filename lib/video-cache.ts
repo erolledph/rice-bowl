@@ -20,7 +20,7 @@ interface CacheEntry {
 const videoCache: Map<string, CacheEntry> = new Map();
 
 // Configuration
-const CACHE_TTL_MS = 3600000; // 1 hour in milliseconds
+const CACHE_TTL_MS = 7200000; // 2 hours in milliseconds (safely handles 5k users @ 5 searches/day)
 const CACHE_TTL_MIN = CACHE_TTL_MS / 60000; // Convert to minutes for logging
 
 /**
