@@ -119,3 +119,21 @@ body {
 		color: #333 !important;
 	}
 }
+
+/* YouTube Embed - Hide Channel/Title Details */
+.youtube-container-hidden-details {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	aspect-ratio: 16/9;
+	pointer-events: auto;
+}
+
+.youtube-container-hidden-details iframe {
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 300%;
+	height: 100%;
+}

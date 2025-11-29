@@ -73,7 +73,6 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 					</>
 				) : (
 					<div className='relative w-full h-full'>
-						{/* YouTube Container with hidden details */}
 						<div className='youtube-container-hidden-details'>
 							<iframe
 								src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1&mute=0&color=white&controls=0&modestbranding=1&playsinline=1&rel=0&enablejsapi=1`}
@@ -116,22 +115,6 @@ export default function VideoCard({ video, onClick }: VideoCardProps) {
 					{video.title}
 				</h3>
 			</div>
-
-			<style jsx>{`
-				.youtube-container-hidden-details {
-					overflow: hidden;
-					width: 100%;
-					height: 100%;
-					aspect-ratio: 16/9;
-					pointer-events: auto;
-				}
-
-				.youtube-container-hidden-details iframe {
-					width: 300%;
-					height: 100%;
-					margin-left: -100%;
-				}
-			`}</style>
 		</div>
 	)
 }
