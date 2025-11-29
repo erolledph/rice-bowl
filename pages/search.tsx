@@ -69,7 +69,6 @@ const SearchPage = () => {
 						Back Home
 					</Link>
 					<div className='flex items-center gap-3 mb-3'>
-						<Search className='w-12 h-12 text-orange-600' />
 						<h1 className='text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent'>
 							Search Results
 						</h1>
