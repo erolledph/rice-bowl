@@ -70,7 +70,7 @@ export async function getFileContent(
 			{
 				headers: {
 					Authorization: `Bearer ${token}`,
-					Accept: 'application/vnd.github.v3.raw',
+					Accept: 'application/vnd.github.v3+json',
 				},
 			}
 		)
