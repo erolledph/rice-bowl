@@ -116,9 +116,10 @@ const VideosPage = () => {
 			observer.observe(observerTarget.current)
 		}
 
+		const currentTarget = observerTarget.current
 		return () => {
-			if (observerTarget.current) {
-				observer.unobserve(observerTarget.current)
+			if (currentTarget) {
+				observer.unobserve(currentTarget)
 			}
 		}
 	}, [page, loading, loadingMore, filteredVideos])
@@ -164,14 +165,12 @@ const VideosPage = () => {
 						Discover amazing cooking tutorials and recipes from professional chefs
 					</p>
 
-					{/* Search Info */}
-					{allVideos.length > 0 && (
-						<p className='text-sm text-zinc-500 dark:text-zinc-400 mb-4'>
-							Showing results for: <span className='font-medium text-zinc-700 dark:text-zinc-300'>"{searchQuery || 'all videos'}"</span>
-						</p>
-					)}
-
-					{/* Search Bar - Form with Submit */}
+				{/* Search Info */}
+				{allVideos.length > 0 && (
+					<p className='text-sm text-zinc-500 dark:text-zinc-400 mb-4'>
+						Showing results for: <span className='font-medium text-zinc-700 dark:text-zinc-300'>&quot;{searchQuery || 'all videos'}&quot;</span>
+					</p>
+				)}					{/* Search Bar - Form with Submit */}
 					<form onSubmit={handleSearchSubmit} className='flex gap-3 items-center mb-8'>
 						<div className='flex-1'>
 							<input
